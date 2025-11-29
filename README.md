@@ -20,17 +20,13 @@ You can start editing the page by modifying `app/page.tsx`. The page auto-update
 
 This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
 
-## Learn More
+## Google OAuth (local-only)
 
-To learn more about Next.js, take a look at the following resources:
+1) Go to https://console.cloud.google.com/apis/credentials (sign in with your Google account).
+2) Create a new project (or select an existing local/dev project).
+3) In “OAuth consent screen”, set User type to External → fill app name/email → add `http://localhost:3000` to authorized domains (via “Add domain”: `localhost`).
+4) Create OAuth Client ID → choose “Web application”.
+5) Authorized redirect URIs: add `http://localhost:3000/api/auth/callback/google` (and add `http://127.0.0.1:3000/api/auth/callback/google` if you sometimes use 127.0.0.1). Save.
+6) Copy the generated **Client ID** and **Client Secret** into `.env` as `GOOGLE_CLIENT_ID` and `GOOGLE_CLIENT_SECRET`. Restart `pnpm dev`/`pnpm start` after updating env.
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
-
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
-
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+If you run on a different port (e.g., 3001), add corresponding redirect URIs like `http://localhost:3001/api/auth/callback/google` as well.
