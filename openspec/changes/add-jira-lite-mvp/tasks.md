@@ -13,8 +13,8 @@
 - [x] 2.5 Enforce team membership checks (404/403) on all scoped APIs; add request guard middleware.
 
 ## 3. Projects (FR-020~027)
-- [ ] 3.1 Project CRUD with 15/team limit, markdown description, favorite toggle per user, archive/restore, soft delete.
-- [ ] 3.2 Project detail: stats block (status counts), tabs for issue list and kanban; honor archived read-only mode.
+- [x] 3.1 Project CRUD with 15/team limit, markdown description, favorite toggle per user, archive/restore, soft delete.
+- [x] 3.2 Project detail: stats block (status counts), tabs for issue list and kanban; honor archived read-only mode.
 
 ## 4. Issues (FR-030~039-2)
 - [ ] 4.1 Issue CRUD with limits (200/project), priority/due/assignee constraints, label attach (20/project, 5/issue), soft delete.
