@@ -20,7 +20,10 @@ export default async function Home() {
           <p className="text-sm text-gray-600">Signed in as</p>
           <p className="text-xl font-semibold">{session.user.email}</p>
         </div>
-        <form action={handleSignOut}>
+        <form action={handleSignOut} className="flex items-center gap-3">
+          <a className="underline" href="/profile">
+            Profile
+          </a>
           <button className="rounded bg-black text-white px-3 py-2" type="submit">
             Sign out
           </button>
