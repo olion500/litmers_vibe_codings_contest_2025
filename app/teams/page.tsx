@@ -9,6 +9,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
+import { AppShell } from "@/components/sidebar";
 
 async function createTeam(formData: FormData) {
   "use server";
@@ -112,7 +113,8 @@ export default async function TeamsPage() {
   });
 
   return (
-    <main className="max-w-4xl mx-auto py-10 space-y-8">
+    <AppShell>
+      <main className="max-w-4xl mx-auto py-6 space-y-8">
       <Card>
         <CardHeader>
           <CardTitle>Teams</CardTitle>
@@ -229,6 +231,7 @@ export default async function TeamsPage() {
           <p className="text-sm text-muted-foreground">You have no teams yet. Create one above.</p>
         )}
       </div>
-    </main>
+      </main>
+    </AppShell>
   );
 }

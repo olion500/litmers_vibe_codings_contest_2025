@@ -8,6 +8,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
+import { AppShell } from "@/components/sidebar";
 
 async function getUser(userId: string) {
   return prisma.user.findUnique({ where: { id: userId, deletedAt: null } });
@@ -121,7 +122,8 @@ export default async function ProfilePage({
   const success = typeof searchParams.success === "string" ? searchParams.success : null;
 
   return (
-    <main className="max-w-3xl mx-auto py-12 space-y-10">
+    <AppShell>
+      <main className="max-w-3xl mx-auto py-8 space-y-10">
       <header>
         <h1 className="text-3xl font-semibold">Profile</h1>
         <p className="text-muted-foreground">Update your details, change password, or delete your account.</p>
@@ -238,6 +240,7 @@ export default async function ProfilePage({
           </form>
         </CardContent>
       </Card>
-    </main>
+      </main>
+    </AppShell>
   );
 }

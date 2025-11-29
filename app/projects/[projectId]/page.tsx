@@ -19,6 +19,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
 import { Checkbox } from "@/components/ui/checkbox";
+import { AppShell } from "@/components/sidebar";
 
 export default async function ProjectDetailPage({
   params,
@@ -171,7 +172,8 @@ export default async function ProjectDetailPage({
   }));
 
   return (
-    <main className="max-w-6xl mx-auto py-10 space-y-8">
+    <AppShell>
+      <main className="max-w-6xl mx-auto py-6 space-y-8">
       <header className="space-y-1">
         <p className="text-sm text-muted-foreground">Team: {project.team.name}</p>
         <h1 className="text-3xl font-semibold">{project.name}</h1>
@@ -436,6 +438,7 @@ export default async function ProjectDetailPage({
           ))}
         </div>
       </section>
-    </main>
+      </main>
+    </AppShell>
   );
 }

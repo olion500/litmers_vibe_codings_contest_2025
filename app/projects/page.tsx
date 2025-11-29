@@ -9,6 +9,7 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
+import { AppShell } from "@/components/sidebar";
 
 const DEFAULT_STATUSES = [
   { name: "Backlog", kind: "BACKLOG", color: "#9CA3AF", position: 0 },
@@ -102,8 +103,9 @@ export default async function ProjectsPage() {
   });
 
   return (
-    <main className="max-w-5xl mx-auto py-10 space-y-8">
-      <Card>
+    <AppShell>
+      <main className="max-w-5xl mx-auto py-6 space-y-8">
+        <Card>
         <CardHeader>
           <CardTitle>Projects</CardTitle>
         </CardHeader>
@@ -177,6 +179,7 @@ export default async function ProjectsPage() {
 
         {projects.length === 0 && <p className="text-sm text-muted-foreground">No projects yet.</p>}
       </div>
-    </main>
+      </main>
+    </AppShell>
   );
 }

@@ -10,6 +10,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Checkbox } from "@/components/ui/checkbox";
+import { AppShell } from "@/components/sidebar";
 
 export default async function IssueDetailPage({ params, searchParams }: { params: { projectId: string; issueId: string }; searchParams?: { [key: string]: string | string[] | undefined } }) {
   const session = await requireSession();
@@ -75,7 +76,8 @@ export default async function IssueDetailPage({ params, searchParams }: { params
   }
 
   return (
-    <main className="max-w-4xl mx-auto py-10 space-y-6">
+    <AppShell>
+      <main className="max-w-4xl mx-auto py-6 space-y-6">
       <div className="flex items-center justify-between">
         <div>
           <p className="text-sm text-muted-foreground">Project {issue.project.name}</p>
@@ -206,6 +208,7 @@ export default async function IssueDetailPage({ params, searchParams }: { params
           )}
         </CardContent>
       </Card>
-    </main>
+      </main>
+    </AppShell>
   );
 }

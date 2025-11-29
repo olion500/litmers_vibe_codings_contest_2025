@@ -4,6 +4,7 @@ import { redirect } from "next/navigation";
 import { revalidatePath } from "next/cache";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { AppShell } from "@/components/sidebar";
 
 async function acceptInviteAction(formData: FormData) {
   "use server";
@@ -45,20 +46,22 @@ export default async function InvitePage({ params }: { params: { token: string }
   }
 
   return (
-    <main className="max-w-xl mx-auto py-12">
-      <Card>
-        <CardHeader>
-          <CardTitle>Accept invitation</CardTitle>
-        </CardHeader>
-        <CardContent className="space-y-3">
-          <p>You are signed in as {session.user.email}.</p>
-          <p>Team: {invite.team.name}</p>
-          <form action={acceptInviteAction} className="space-y-3">
-            <input type="hidden" name="token" value={params.token} />
-            <Button type="submit">Join team</Button>
-          </form>
-        </CardContent>
-      </Card>
-    </main>
+    <AppShell>
+      <main className="max-w-xl mx-auto py-6">
+        <Card>
+          <CardHeader>
+            <CardTitle>Accept invitation</CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-3">
+            <p>You are signed in as {session.user.email}.</p>
+            <p>Team: {invite.team.name}</p>
+            <form action={acceptInviteAction} className="space-y-3">
+              <input type="hidden" name="token" value={params.token} />
+              <Button type="submit">Join team</Button>
+            </form>
+          </CardContent>
+        </Card>
+      </main>
+    </AppShell>
   );
 }
