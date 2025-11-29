@@ -69,6 +69,10 @@ export const { auth, signIn, signOut, handlers: { GET, POST } } = NextAuth({
       }
       return session;
     },
+    redirect: async ({ url, baseUrl }) => {
+      if (url.startsWith(baseUrl)) return url;
+      return `${baseUrl}/projects`;
+    },
   },
   pages: {
     signIn: "/login",
