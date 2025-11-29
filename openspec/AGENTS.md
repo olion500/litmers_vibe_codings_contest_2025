@@ -21,6 +21,12 @@ Instructions for AI coding assistants using OpenSpec for spec-driven development
 - Dev/Deploy: Docker Compose for local Postgres/Redis/MailHog; production deploy on Vercel with managed Postgres.
 - .env and Makefile: Do not pre-create; add only when implementation requires. Use Docker-based Postgres/Redis/MailHog and app env vars when we start coding.
 
+## TDD Execution & Commit Policy
+- Work task-by-task in `openspec/changes/add-jira-lite-mvp/tasks.md`.
+- For each task: write failing tests first (unit/integration/Playwright as appropriate), implement, rerun until green, then commit that task separately.
+- Keep commits scoped to one task; include tests and code in the same commit.
+- Favor minimal implementations to satisfy tests; add complexity only when the PRD or specs require it.
+
 ## Three-Stage Workflow
 
 ### Stage 1: Creating Changes
