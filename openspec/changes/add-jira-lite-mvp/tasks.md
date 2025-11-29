@@ -24,8 +24,8 @@
 - [x] 4.5 Search/filter/sort on title, status, assignee, priority, labels, due range, has due; support pagination. *(pagination API done; due-range UI pending; pagination UI pending)*
 
 ## 5. Comments (FR-060~063)
-- [ ] 5.1 Comment CRUD with permissions (author/owner/admin) and soft delete; content length validation.
-- [ ] 5.2 Comment list with chronological order + pagination/infinite scroll.
+- [x] 5.1 Comment CRUD with permissions (author/owner/admin) and soft delete; content length validation.
+- [x] 5.2 Comment list with chronological order + pagination/infinite scroll. *(pagination implemented; infinite scroll omitted)*
 
 ## 6. AI Features (FR-040~045, 042, 043, 044)
 - [ ] 6.1 AI summary (2-4 sentences) and solution suggestion; min description >10 chars; cache + invalidation.

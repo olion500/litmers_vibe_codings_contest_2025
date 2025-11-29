@@ -109,6 +109,12 @@ export const statusSchemas = {
   updateWip: z.object({ wipLimit: z.number().int().nonnegative().max(50).default(0) }),
 };
 
+export const commentSchemas = {
+  create: z.object({ issueId: z.string(), content: z.string().min(1).max(2000) }),
+  update: z.object({ content: z.string().min(1).max(2000) }),
+  list: z.object({ page: z.number().int().positive().optional(), pageSize: z.number().int().positive().max(100).optional() }),
+};
+
 export type IssueCreateInput = z.infer<typeof issueSchemas.create>;
 export type IssueUpdateInput = z.infer<typeof issueSchemas.update>;
 export type IssueQueryInput = z.infer<typeof issueSchemas.issueQuery>;

@@ -1,9 +1,14 @@
 import { prisma } from "@/lib/prisma";
 import { requireSession } from "@/lib/session";
-import { notFound } from "next/navigation";
+import { notFound, redirect } from "next/navigation";
+import { revalidatePath } from "next/cache";
+import { commentSchemas } from "@/lib/validation";
+import { softDeleteComment, updateComment } from "@/lib/comments";
 
-export default async function IssueDetailPage({ params }: { params: { projectId: string; issueId: string } }) {
+export default async function IssueDetailPage({ params, searchParams }: { params: { projectId: string; issueId: string }; searchParams?: { [key: string]: string | string[] | undefined } }) {
   const session = await requireSession();
+  const page = Number(searchParams?.page) || 1;
+  const pageSize = 10;
 
   const issue = await prisma.issue.findFirst({
     where: {
@@ -24,6 +29,44 @@ export default async function IssueDetailPage({ params }: { params: { projectId:
   });
 
   if (!issue) notFound();
+
+  const commentsTotal = await prisma.comment.count({ where: { issueId: issue.id, deletedAt: null } });
+  const comments = await prisma.comment.findMany({
+    where: { issueId: issue.id, deletedAt: null },
+    include: { author: true },
+    orderBy: { createdAt: "asc" },
+    skip: (page - 1) * pageSize,
+    take: pageSize,
+  });
+
+  async function addComment(formData: FormData) {
+    "use server";
+    const session = await requireSession();
+    const content = String(formData.get("content") || "").trim();
+    const parsed = commentSchemas.create.safeParse({ issueId: params.issueId, content });
+    if (!parsed.success) redirect(`/projects/${params.projectId}/issues/${params.issueId}?error=comment`);
+    await prisma.comment.create({ data: { issueId: params.issueId, authorId: session.user.id, content: parsed.data.content } });
+    revalidatePath(`/projects/${params.projectId}/issues/${params.issueId}`);
+  }
+
+  async function editComment(formData: FormData) {
+    "use server";
+    const session = await requireSession();
+    const commentId = String(formData.get("commentId"));
+    const content = String(formData.get("content") || "").trim();
+    const parsed = commentSchemas.update.safeParse({ content });
+    if (!parsed.success) redirect(`/projects/${params.projectId}/issues/${params.issueId}?error=comment`);
+    await updateComment(commentId, session.user.id, parsed.data.content);
+    revalidatePath(`/projects/${params.projectId}/issues/${params.issueId}`);
+  }
+
+  async function removeComment(formData: FormData) {
+    "use server";
+    const session = await requireSession();
+    const commentId = String(formData.get("commentId"));
+    await softDeleteComment(commentId, session.user.id);
+    revalidatePath(`/projects/${params.projectId}/issues/${params.issueId}`);
+  }
 
   return (
     <main className="max-w-4xl mx-auto py-10 space-y-6">
@@ -89,6 +132,57 @@ export default async function IssueDetailPage({ params }: { params: { projectId:
           ))}
           {issue.histories.length === 0 && <li className="text-xs text-gray-500">No changes yet.</li>}
         </ul>
+      </section>
+
+      <section className="rounded border p-4 bg-white shadow-sm space-y-3">
+        <div className="flex items-center justify-between">
+          <h2 className="text-lg font-semibold">Comments</h2>
+          <p className="text-xs text-gray-500">{commentsTotal} total</p>
+        </div>
+        <form action={addComment} className="space-y-2">
+          <textarea name="content" rows={3} maxLength={2000} required className="w-full rounded border px-3 py-2" placeholder="Add a comment" />
+          <div className="flex justify-end">
+            <button type="submit" className="rounded bg-gray-900 text-white px-3 py-1">Post</button>
+          </div>
+        </form>
+        <div className="space-y-3">
+          {comments.map((c) => {
+            const canManage = c.authorId === session.user.id || issue.project.team.ownerId === session.user.id || issue.project.team.members.some((m) => m.userId === session.user.id && (m.role === "OWNER" || m.role === "ADMIN"));
+            return (
+              <article key={c.id} className="border rounded p-3 space-y-1 bg-gray-50">
+                <div className="flex justify-between text-xs text-gray-600">
+                  <span>{c.author?.name || c.author?.email || "User"}</span>
+                  <span>{new Date(c.createdAt).toLocaleString()}</span>
+                </div>
+                <p className="text-sm text-gray-800 whitespace-pre-line">{c.content}</p>
+                {canManage && (
+                  <div className="flex gap-2 text-[11px] text-blue-600">
+                    <form action={removeComment}>
+                      <input type="hidden" name="commentId" value={c.id} />
+                      <button className="underline">Delete</button>
+                    </form>
+                    <form action={editComment} className="flex gap-1 items-center">
+                      <input type="hidden" name="commentId" value={c.id} />
+                      <input name="content" defaultValue={c.content} className="rounded border px-2 py-1 text-xs" maxLength={2000} />
+                      <button className="underline">Save</button>
+                    </form>
+                  </div>
+                )}
+              </article>
+            );
+          })}
+          {comments.length === 0 && <p className="text-sm text-gray-500">No comments yet.</p>}
+        </div>
+        {commentsTotal > pageSize && (
+          <div className="flex justify-between text-xs text-blue-600">
+            {page > 1 ? (
+              <a href={`?page=${page - 1}`} className="underline">Previous</a>
+            ) : <span />}
+            {(page * pageSize) < commentsTotal ? (
+              <a href={`?page=${page + 1}`} className="underline">Next</a>
+            ) : <span />}
+          </div>
+        )}
       </section>
     </main>
   );

@@ -31,6 +31,7 @@ model User {
   createdIssues Issue[] @relation("IssueCreator")
   assignedIssues Issue[] @relation("IssueAssignee")
   issueHistories IssueHistory[] @relation("HistoryActor")
+  comments Comment[]
 }
 
 enum TeamRole {
@@ -139,9 +140,10 @@ model Issue {
   status   Status    @relation(fields: [statusId], references: [id], onDelete: Cascade)
   assignee User?     @relation("IssueAssignee", fields: [assigneeId], references: [id])
   owner    User      @relation("IssueCreator", fields: [ownerId], references: [id])
-  labels   IssueLabel[]
-  subtasks Subtask[]
+  labels    IssueLabel[]
+  subtasks  Subtask[]
   histories IssueHistory[]
+  comments  Comment[]
 
   @@index([projectId, deletedAt])
   @@index([statusId, statusOrder])
@@ -199,6 +201,23 @@ model IssueHistory {
   actor User  @relation("HistoryActor", fields: [actorId], references: [id], onDelete: Cascade)
 
   @@index([issueId, createdAt])
+}
+
+model Comment {
+  id        String   @id @default(cuid())
+  issueId   String
+  authorId  String
+  content   String
+  deletedAt DateTime?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  issue  Issue @relation(fields: [issueId], references: [id], onDelete: Cascade)
+  author User  @relation(fields: [authorId], references: [id], onDelete: Cascade)
+
+  @@index([issueId])
+  @@index([authorId])
+  @@index([createdAt])
 }
 
 model TeamMember {
