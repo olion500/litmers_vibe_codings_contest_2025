@@ -191,8 +191,8 @@ clean: ## Remove node_modules and reinstall (for dependency issues)
 	@echo "✓ Clean install complete"
 
 ##@ Git
-.PHONY: status
-status: ## Show git status
+.PHONY: git-status
+git-status: ## Show git status
 	@echo "📊 Git Status:"
 	git status
 
