@@ -13,7 +13,7 @@ import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
 import { AppShell } from "@/components/sidebar";
 import { KanbanBoard } from "@/components/kanban-board";
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import { Dialog, DialogClose, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 
 export default async function ProjectDetailPage({
   params,
@@ -209,9 +209,11 @@ export default async function ProjectDetailPage({
                   <Textarea name="description" id="description" maxLength={5000} rows={4} />
                 </div>
                 <div className="md:col-span-2 flex justify-end gap-2">
-                  <Button variant="outline" type="button" onClick={() => (document?.activeElement as HTMLElement | null)?.blur()}>
-                    Cancel
-                  </Button>
+                  <DialogClose asChild>
+                    <Button variant="outline" type="button">
+                      Cancel
+                    </Button>
+                  </DialogClose>
                   <Button type="submit">Create Issue</Button>
                 </div>
               </form>
