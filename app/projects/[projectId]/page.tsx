@@ -127,7 +127,7 @@ export default async function ProjectDetailPage({
           <h1 className="text-3xl font-semibold">{project.name}</h1>
           {project.archivedAt && <Badge variant="secondary">Archived</Badge>}
         </div>
-        <div className="flex gap-2">
+        <div className="flex flex-wrap gap-2">
           <Dialog>
             <DialogTrigger asChild>
               <Button size="sm" variant="outline">New status</Button>
@@ -227,6 +227,27 @@ export default async function ProjectDetailPage({
               </form>
             </DialogContent>
           </Dialog>
+
+          <Dialog>
+            <DialogTrigger asChild>
+              <Button size="sm" variant="secondary">New label</Button>
+            </DialogTrigger>
+            <DialogContent className="sm:max-w-md">
+              <DialogHeader>
+                <DialogTitle>Create label</DialogTitle>
+              </DialogHeader>
+              <form action={addLabel} className="space-y-3">
+                <Input name="name" placeholder="Label name" maxLength={40} required />
+                <Input name="color" placeholder="#2563EB" />
+                <div className="flex justify-end gap-2">
+                  <DialogClose asChild>
+                    <Button variant="outline" type="button">Cancel</Button>
+                  </DialogClose>
+                  <Button type="submit">Add</Button>
+                </div>
+              </form>
+            </DialogContent>
+          </Dialog>
         </div>
       </header>
 
@@ -242,15 +263,8 @@ export default async function ProjectDetailPage({
       )}
 
       <Card>
-        <CardHeader className="pb-2 flex flex-row items-center justify-between space-y-0">
+        <CardHeader className="pb-2">
           <CardTitle>Labels</CardTitle>
-          <form action={addLabel} className="flex gap-2 items-center">
-            <Input name="name" placeholder="Label name" maxLength={40} className="w-36" />
-            <Input name="color" placeholder="#2563EB" className="w-28" />
-            <Button type="submit" size="sm">
-              Add
-            </Button>
-          </form>
         </CardHeader>
         <CardContent>
           <div className="flex flex-wrap gap-2">
