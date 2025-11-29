@@ -1,44 +1,55 @@
-NAME=litmers-vibe
+NAME=jira-lite-mvp
 
-help: ## Show available targets
-	@awk 'BEGIN {FS = ":.*##"; printf "\nUsage:\n"} /^[A-Za-z0-9_.-]+:.*##/ { printf "  %-18s %s\n", $$1, $$2 } /^##@/ { printf "\n%s\n", substr($$0,5) } ' $(MAKEFILE_LIST)
+.PHONY: help
+help: ## Show all available commands
+	@awk 'BEGIN {FS = ":.*##"; printf "\n🚀 Jira Lite MVP\n\nUsage:\n  make [command]\n\nCommands:\n"} /^[A-Za-z_-]+:.*##/ { printf "  %-15s %s\n", $$1, $$2 }' $(MAKEFILE_LIST)
 
-.PHONY: start
-start: ## Start local services (Postgres, Redis, MailHog)
+.PHONY: setup
+setup: ## One-time setup (install deps, docker services, database)
+	@echo "📦 Installing dependencies..."
+	pnpm install
+	@echo "🔧 Creating .env file..."
+	@if [ ! -f .env ]; then cp .env.example .env; echo "✓ Created .env"; else echo "✓ .env exists"; fi
+	@echo "🐳 Starting Docker services..."
 	docker compose up -d
-
-.PHONY: stop
-stop: ## Stop all local services
-	docker compose down
-
-.PHONY: status
-status: ## Show service status
-	docker compose ps
-
-.PHONY: logs
-logs: ## Tail service logs
-	docker compose logs -f
-
-.PHONY: db-shell
-db-shell: ## Open psql shell inside Postgres container
-	docker compose exec postgres psql -U app -d jira_lite
+	@sleep 3
+	@echo "📊 Applying database migrations..."
+	pnpm prisma db push
+	@echo "✅ Setup complete! Run 'make dev' to start"
 
 .PHONY: dev
-dev: ## Run Next.js dev server
+dev: ## Start development server (http://localhost:3000)
 	pnpm dev
 
+.PHONY: build
+build: ## Build for production
+	pnpm build
+
+.PHONY: start
+start: ## Start Docker services
+	docker compose up -d
+	@echo "✓ Services started"
+
+.PHONY: stop
+stop: ## Stop Docker services
+	docker compose down
+	@echo "✓ Services stopped"
+
+.PHONY: logs
+logs: ## View service logs (Ctrl+C to exit)
+	docker compose logs -f
+
 .PHONY: lint
-lint: ## Run eslint
+lint: ## Run code linter
 	pnpm lint
 
 .PHONY: test
-test: ## Run vitest
+test: ## Run tests
 	pnpm test
 
-.PHONY: build
-build: ## Build production bundle
-	pnpm build
+.PHONY: clean
+clean: ## Clean dependencies (for issues)
+	rm -rf node_modules pnpm-lock.yaml
+	pnpm install
 
-.PHONY: prisma-push
-prisma-push: ## Apply Prisma schema to local DB
-	pnpm prisma db push
+.DEFAULT_GOAL := help

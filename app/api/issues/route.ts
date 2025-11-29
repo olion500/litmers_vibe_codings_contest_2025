@@ -24,8 +24,9 @@ export async function GET(req: Request) {
     deletedAt: null,
   };
   if (statusIds.length) filters.statusId = { in: statusIds };
-  if (searchParams.get("assigneeId")) filters.assigneeId = searchParams.get("assigneeId");
-  if (searchParams.get("priority")) filters.priority = searchParams.get("priority");
+  if (searchParams.get("assigneeId")) filters.assigneeId = searchParams.get("assigneeId")!;
+  const priority = searchParams.get("priority");
+  if (priority) filters.priority = priority as any;
   if (searchParams.get("hasDue")) filters.dueDate = searchParams.get("hasDue") === "true" ? { not: null } : null;
   const dueFrom = searchParams.get("dueFrom");
   const dueTo = searchParams.get("dueTo");
