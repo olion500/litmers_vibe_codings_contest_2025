@@ -16,6 +16,10 @@ export async function getSessionFromCookies() {
   });
 
   if (!session) return null;
+  if (session.user.deletedAt) {
+    await prisma.session.delete({ where: { sessionToken: token } }).catch(() => {});
+    return null;
+  }
   if (session.expires.getTime() < Date.now()) {
     await prisma.session.delete({ where: { sessionToken: token } }).catch(() => {});
     cookieStore.delete("__Secure-next-auth.session-token");

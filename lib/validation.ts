@@ -38,6 +38,13 @@ export type UpdateProfileInput = z.infer<typeof profileSchemas.updateProfile>;
 export type ChangePasswordInput = z.infer<typeof profileSchemas.changePassword>;
 export type DeleteAccountInput = z.infer<typeof profileSchemas.deleteAccount>;
 
+export const teamSchemas = {
+  create: z.object({ name: z.string().min(1).max(50) }),
+  rename: z.object({ name: z.string().min(1).max(50) }),
+  invite: z.object({ email: z.string().email() }),
+  changeRole: z.object({ role: z.enum(["OWNER", "ADMIN", "MEMBER"]) }),
+};
+
 export type RegisterInput = z.infer<typeof authSchemas.register>;
 export type LoginInput = z.infer<typeof authSchemas.login>;
 export type ResetRequestInput = z.infer<typeof authSchemas.requestReset>;

@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { authSchemas, profileSchemas } from "@/lib/validation";
+import { authSchemas, profileSchemas, teamSchemas } from "@/lib/validation";
 import { validatePassword } from "@/lib/password";
 
 describe("auth validation", () => {
@@ -50,5 +50,17 @@ describe("profile validation", () => {
   it("requires strong enough password change inputs", () => {
     const parsed = profileSchemas.changePassword.safeParse({ currentPassword: "12345", newPassword: "12345" });
     expect(parsed.success).toBe(false);
+  });
+});
+
+describe("team validation", () => {
+  it("validates team name length", () => {
+    expect(teamSchemas.create.safeParse({ name: "A" }).success).toBe(true);
+    expect(teamSchemas.create.safeParse({ name: "" }).success).toBe(false);
+  });
+
+  it("validates invite email", () => {
+    expect(teamSchemas.invite.safeParse({ email: "x@example.com" }).success).toBe(true);
+    expect(teamSchemas.invite.safeParse({ email: "no" }).success).toBe(false);
   });
 });

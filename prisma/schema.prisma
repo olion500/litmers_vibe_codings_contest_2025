@@ -23,6 +23,81 @@ model User {
   accounts Account[]
   sessions Session[]
   passwordResetTokens PasswordResetToken[]
+  teamMembers TeamMember[]
+  ownedTeams Team[] @relation("TeamOwner")
+  sentInvites TeamInvite[] @relation("InviteSender")
+  activities TeamActivity[] @relation("ActivityActor")
+}
+
+enum TeamRole {
+  OWNER
+  ADMIN
+  MEMBER
+}
+
+model Team {
+  id        String   @id @default(cuid())
+  name      String
+  ownerId   String
+  deletedAt DateTime?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  owner   User   @relation("TeamOwner", fields: [ownerId], references: [id])
+  members TeamMember[]
+  invites TeamInvite[]
+  activities TeamActivity[]
+
+  @@index([ownerId])
+}
+
+model TeamMember {
+  id        String   @id @default(cuid())
+  teamId    String
+  userId    String
+  role      TeamRole @default(MEMBER)
+  deletedAt DateTime?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  team Team @relation(fields: [teamId], references: [id], onDelete: Cascade)
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([teamId, userId])
+  @@index([userId])
+}
+
+model TeamInvite {
+  id          String   @id @default(cuid())
+  teamId      String
+  email       String
+  token       String   @unique
+  expiresAt   DateTime
+  acceptedAt  DateTime?
+  createdById String
+  createdAt   DateTime @default(now())
+
+  team   Team @relation(fields: [teamId], references: [id], onDelete: Cascade)
+  sender User @relation("InviteSender", fields: [createdById], references: [id], onDelete: Cascade)
+
+  @@index([teamId])
+  @@index([email])
+  @@unique([teamId, email])
+}
+
+model TeamActivity {
+  id        String   @id @default(cuid())
+  teamId    String
+  actorId   String
+  type      String
+  message   String
+  createdAt DateTime @default(now())
+
+  team  Team @relation(fields: [teamId], references: [id], onDelete: Cascade)
+  actor User @relation("ActivityActor", fields: [actorId], references: [id], onDelete: Cascade)
+
+  @@index([teamId])
+  @@index([createdAt])
 }
 
 model Account {
