@@ -121,26 +121,36 @@ export default async function ProjectDetailPage({
   return (
     <AppShell>
       <main className="max-w-6xl mx-auto py-6 space-y-8">
-      <header className="space-y-1">
-        <p className="text-sm text-muted-foreground">Team: {project.team.name}</p>
-        <h1 className="text-3xl font-semibold">{project.name}</h1>
-        {project.archivedAt && <Badge variant="secondary">Archived</Badge>}
-      </header>
+      <header className="flex flex-wrap items-start justify-between gap-4">
+        <div className="space-y-1">
+          <p className="text-sm text-muted-foreground">Team: {project.team.name}</p>
+          <h1 className="text-3xl font-semibold">{project.name}</h1>
+          {project.archivedAt && <Badge variant="secondary">Archived</Badge>}
+        </div>
+        <div className="flex gap-2">
+          <Dialog>
+            <DialogTrigger asChild>
+              <Button size="sm" variant="outline">New status</Button>
+            </DialogTrigger>
+            <DialogContent className="sm:max-w-md">
+              <DialogHeader>
+                <DialogTitle>Add custom status</DialogTitle>
+              </DialogHeader>
+              <form action={addStatus} className="space-y-3">
+                <Input name="name" placeholder="Name" maxLength={40} required />
+                <Input name="color" placeholder="#2563EB" />
+                <Input name="wipLimit" type="number" min={0} max={50} placeholder="WIP (0=∞)" />
+                <div className="flex justify-end gap-2">
+                  <DialogClose asChild>
+                    <Button variant="outline" type="button">Cancel</Button>
+                  </DialogClose>
+                  <Button type="submit">Add</Button>
+                </div>
+              </form>
+              <p className="text-xs text-muted-foreground">Up to 5 custom statuses. WIP 1-50 or 0 for unlimited.</p>
+            </DialogContent>
+          </Dialog>
 
-      {project.description && (
-        <Card>
-          <CardHeader className="pb-2">
-            <CardTitle>Description</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <p className="whitespace-pre-line text-foreground/80">{project.description}</p>
-          </CardContent>
-        </Card>
-      )}
-
-      <Card>
-        <CardHeader className="pb-2 flex items-center justify-between">
-          <CardTitle>Issues</CardTitle>
           <Dialog>
             <DialogTrigger asChild>
               <Button size="sm">New issue</Button>
@@ -151,7 +161,7 @@ export default async function ProjectDetailPage({
               </DialogHeader>
               <form action={addIssue} className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <input type="hidden" name="projectId" value={project.id} />
-                <div className="space-y-2">
+                <div className="space-y-2 md:col-span-2">
                   <Label htmlFor="title">Title</Label>
                   <Input name="title" id="title" required maxLength={200} />
                 </div>
@@ -210,17 +220,26 @@ export default async function ProjectDetailPage({
                 </div>
                 <div className="md:col-span-2 flex justify-end gap-2">
                   <DialogClose asChild>
-                    <Button variant="outline" type="button">
-                      Cancel
-                    </Button>
+                    <Button variant="outline" type="button">Cancel</Button>
                   </DialogClose>
                   <Button type="submit">Create Issue</Button>
                 </div>
               </form>
             </DialogContent>
           </Dialog>
-        </CardHeader>
-      </Card>
+        </div>
+      </header>
+
+      {project.description && (
+        <Card>
+          <CardHeader className="pb-2">
+            <CardTitle>Description</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <p className="whitespace-pre-line text-foreground/80">{project.description}</p>
+          </CardContent>
+        </Card>
+      )}
 
       <Card>
         <CardHeader className="pb-2 flex flex-row items-center justify-between space-y-0">
