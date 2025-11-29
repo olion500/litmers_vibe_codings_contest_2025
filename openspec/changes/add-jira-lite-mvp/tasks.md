@@ -6,11 +6,11 @@
 - [x] 1.5 Profile view/edit (name, avatar upload/URL), password change (non-OAuth), and account deletion with team ownership guard + soft delete.
 
 ## 2. Teams & Access Control (FR-010~019, 070, 071)
-- [ ] 2.1 Team CRUD with limits and soft delete; OWNER cannot leave.
-- [ ] 2.2 Invites: create/resend with 7d expiry, accept flow, email send; pending list UI.
-- [ ] 2.3 Roles: OWNER/ADMIN/MEMBER change rules, kick/leave rules, owner transfer while keeping one OWNER.
-- [ ] 2.4 Activity log (join/leave, role change, project lifecycle) with pagination; store performer/target/timestamp.
-- [ ] 2.5 Enforce team membership checks (404/403) on all scoped APIs; add request guard middleware.
+- [x] 2.1 Team CRUD with limits and soft delete; OWNER cannot leave.
+- [x] 2.2 Invites: create/resend with 7d expiry, accept flow, email send; pending list UI.
+- [x] 2.3 Roles: OWNER/ADMIN/MEMBER change rules, kick/leave rules, owner transfer while keeping one OWNER.
+- [x] 2.4 Activity log (join/leave, role change, project lifecycle) with pagination; store performer/target/timestamp.
+- [x] 2.5 Enforce team membership checks (404/403) on all scoped APIs; add request guard middleware.
 
 ## 3. Projects (FR-020~027)
 - [ ] 3.1 Project CRUD with 15/team limit, markdown description, favorite toggle per user, archive/restore, soft delete.
