@@ -3,6 +3,12 @@ import { requireSession } from "@/lib/session";
 import { projectSchemas } from "@/lib/validation";
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
+import { Label } from "@/components/ui/label";
+import { Badge } from "@/components/ui/badge";
 
 const DEFAULT_STATUSES = [
   { name: "Backlog", kind: "BACKLOG", color: "#9CA3AF", position: 0 },
@@ -97,74 +103,79 @@ export default async function ProjectsPage() {
 
   return (
     <main className="max-w-5xl mx-auto py-10 space-y-8">
-      <section className="rounded border p-6 bg-white shadow-sm">
-        <h1 className="text-2xl font-semibold mb-4">Projects</h1>
-        <form action={createProject} className="grid grid-cols-1 md:grid-cols-3 gap-3 items-start">
-          <div>
-            <label className="block text-sm font-medium">Team</label>
-            <select
-              name="teamId"
-              required
-              defaultValue=""
-              className="mt-1 w-full rounded border px-3 py-2"
-            >
-              <option value="" disabled>
-                Select team
-              </option>
-              {teams.map((t) => (
-                <option key={t.id} value={t.id}>
-                  {t.name}
+      <Card>
+        <CardHeader>
+          <CardTitle>Projects</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <form action={createProject} className="grid grid-cols-1 md:grid-cols-3 gap-3 items-start">
+            <div className="space-y-2">
+              <Label htmlFor="teamId">Team</Label>
+              <select
+                name="teamId"
+                id="teamId"
+                required
+                defaultValue=""
+                className="w-full rounded-md border border-input bg-background px-3 py-2 text-sm shadow-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+              >
+                <option value="" disabled>
+                  Select team
                 </option>
-              ))}
-            </select>
-          </div>
-          <div>
-            <label className="block text-sm font-medium">Name</label>
-            <input name="name" required minLength={1} maxLength={100} className="mt-1 w-full rounded border px-3 py-2" />
-          </div>
-          <div className="md:col-span-3">
-            <label className="block text-sm font-medium">Description (markdown)</label>
-            <textarea name="description" maxLength={2000} className="mt-1 w-full rounded border px-3 py-2" rows={3} />
-          </div>
-          <div className="md:col-span-3 flex justify-end">
-            <button className="rounded bg-black text-white px-4 py-2" type="submit">
-              Create
-            </button>
-          </div>
-        </form>
-      </section>
+                {teams.map((t) => (
+                  <option key={t.id} value={t.id}>
+                    {t.name}
+                  </option>
+                ))}
+              </select>
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="name">Name</Label>
+              <Input name="name" id="name" required minLength={1} maxLength={100} />
+            </div>
+            <div className="md:col-span-3 space-y-2">
+              <Label htmlFor="description">Description (markdown)</Label>
+              <Textarea name="description" id="description" maxLength={2000} rows={3} />
+            </div>
+            <div className="md:col-span-3 flex justify-end">
+              <Button type="submit">Create</Button>
+            </div>
+          </form>
+        </CardContent>
+      </Card>
 
       <div className="space-y-4">
         {projects.map((p) => (
-          <article key={p.id} className="rounded border p-5 bg-white shadow-sm space-y-2">
-            <div className="flex items-center justify-between">
-              <div>
-                <a className="text-xl font-semibold underline" href={`/projects/${p.id}`}>
-                  {p.name}
-                </a>
-                <p className="text-sm text-gray-600">Team: {p.team.name}</p>
-                {p.archivedAt && <p className="text-xs text-orange-600">Archived</p>}
+          <Card key={p.id}>
+            <CardContent className="space-y-2 pt-6">
+              <div className="flex items-center justify-between gap-3">
+                <div className="space-y-1">
+                  <a className="text-xl font-semibold hover:underline" href={`/projects/${p.id}`}>
+                    {p.name}
+                  </a>
+                  <p className="text-sm text-muted-foreground">Team: {p.team.name}</p>
+                  {p.archivedAt && <Badge variant="secondary">Archived</Badge>}
+                </div>
+                <div className="flex gap-2">
+                  <form action={toggleFavorite}>
+                    <input type="hidden" name="projectId" value={p.id} />
+                    <Button variant="outline" size="sm" type="submit">
+                      {p.favorites.length ? "★ Unfavorite" : "☆ Favorite"}
+                    </Button>
+                  </form>
+                  <form action={toggleArchive}>
+                    <input type="hidden" name="projectId" value={p.id} />
+                    <Button variant="outline" size="sm" type="submit">
+                      {p.archivedAt ? "Restore" : "Archive"}
+                    </Button>
+                  </form>
+                </div>
               </div>
-              <div className="flex gap-2">
-                <form action={toggleFavorite}>
-                  <input type="hidden" name="projectId" value={p.id} />
-                  <button className="rounded border px-3 py-1" type="submit">
-                    {p.favorites.length ? "★ Unfavorite" : "☆ Favorite"}
-                  </button>
-                </form>
-                <form action={toggleArchive}>
-                  <input type="hidden" name="projectId" value={p.id} />
-                  <button className="rounded border px-3 py-1" type="submit">
-                    {p.archivedAt ? "Restore" : "Archive"}
-                  </button>
-                </form>
-              </div>
-            </div>
-            {p.description && <p className="text-sm text-gray-700 whitespace-pre-line">{p.description}</p>}
-          </article>
+              {p.description && <p className="text-sm text-foreground/80 whitespace-pre-line">{p.description}</p>}
+            </CardContent>
+          </Card>
         ))}
 
-        {projects.length === 0 && <p className="text-sm text-gray-600">No projects yet.</p>}
+        {projects.length === 0 && <p className="text-sm text-muted-foreground">No projects yet.</p>}
       </div>
     </main>
   );

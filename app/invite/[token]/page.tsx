@@ -2,6 +2,8 @@ import { prisma } from "@/lib/prisma";
 import { requireSession } from "@/lib/session";
 import { redirect } from "next/navigation";
 import { revalidatePath } from "next/cache";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 
 async function acceptInviteAction(formData: FormData) {
   "use server";
@@ -43,16 +45,20 @@ export default async function InvitePage({ params }: { params: { token: string }
   }
 
   return (
-    <main className="max-w-xl mx-auto py-12 space-y-4">
-      <h1 className="text-2xl font-semibold">Accept invitation</h1>
-      <p>You are signed in as {session.user.email}.</p>
-      <p>Team: {invite.team.name}</p>
-      <form action={acceptInviteAction} className="space-y-3">
-        <input type="hidden" name="token" value={params.token} />
-        <button className="rounded bg-black text-white px-4 py-2" type="submit">
-          Join team
-        </button>
-      </form>
+    <main className="max-w-xl mx-auto py-12">
+      <Card>
+        <CardHeader>
+          <CardTitle>Accept invitation</CardTitle>
+        </CardHeader>
+        <CardContent className="space-y-3">
+          <p>You are signed in as {session.user.email}.</p>
+          <p>Team: {invite.team.name}</p>
+          <form action={acceptInviteAction} className="space-y-3">
+            <input type="hidden" name="token" value={params.token} />
+            <Button type="submit">Join team</Button>
+          </form>
+        </CardContent>
+      </Card>
     </main>
   );
 }

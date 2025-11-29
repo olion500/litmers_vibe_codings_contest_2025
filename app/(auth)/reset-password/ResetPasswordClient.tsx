@@ -2,6 +2,11 @@
 
 import { useRouter, useSearchParams } from "next/navigation";
 import { useState } from "react";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Button } from "@/components/ui/button";
+import { Alert, AlertDescription } from "@/components/ui/alert";
 
 export function ResetPasswordClient() {
   const searchParams = useSearchParams();
@@ -70,70 +75,90 @@ export function ResetPasswordClient() {
   if (token) {
     return (
       <div className="max-w-md mx-auto py-12">
-        <h1 className="text-2xl font-semibold mb-6">Set a new password</h1>
-        <form onSubmit={submitNewPassword} className="space-y-4">
-          <div>
-            <label className="block text-sm font-medium">New password</label>
-            <input
-              className="mt-1 w-full rounded border px-3 py-2"
-              type="password"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              required
-              minLength={6}
-              maxLength={100}
-            />
-          </div>
-          <div>
-            <label className="block text-sm font-medium">Confirm password</label>
-            <input
-              className="mt-1 w-full rounded border px-3 py-2"
-              type="password"
-              value={confirm}
-              onChange={(e) => setConfirm(e.target.value)}
-              required
-              minLength={6}
-              maxLength={100}
-            />
-          </div>
-          {error && <p className="text-sm text-red-600">{error}</p>}
-          {status && <p className="text-sm text-green-700">{status}</p>}
-          <button
-            type="submit"
-            className="w-full rounded bg-black text-white py-2 disabled:opacity-60"
-            disabled={loading}
-          >
-            {loading ? "Saving..." : "Reset password"}
-          </button>
-        </form>
+        <Card>
+          <CardHeader>
+            <CardTitle>Set a new password</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <form onSubmit={submitNewPassword} className="space-y-4">
+              <div className="space-y-2">
+                <Label htmlFor="password">New password</Label>
+                <Input
+                  id="password"
+                  type="password"
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  required
+                  minLength={6}
+                  maxLength={100}
+                />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="confirm">Confirm password</Label>
+                <Input
+                  id="confirm"
+                  type="password"
+                  value={confirm}
+                  onChange={(e) => setConfirm(e.target.value)}
+                  required
+                  minLength={6}
+                  maxLength={100}
+                />
+              </div>
+              {error && (
+                <Alert>
+                  <AlertDescription>{error}</AlertDescription>
+                </Alert>
+              )}
+              {status && (
+                <Alert>
+                  <AlertDescription className="text-green-700">{status}</AlertDescription>
+                </Alert>
+              )}
+              <Button type="submit" className="w-full" disabled={loading}>
+                {loading ? "Saving..." : "Reset password"}
+              </Button>
+            </form>
+          </CardContent>
+        </Card>
       </div>
     );
   }
 
   return (
     <div className="max-w-md mx-auto py-12">
-      <h1 className="text-2xl font-semibold mb-6">Reset password</h1>
-      <form onSubmit={requestReset} className="space-y-4">
-        <div>
-          <label className="block text-sm font-medium">Email</label>
-          <input
-            className="mt-1 w-full rounded border px-3 py-2"
-            type="email"
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
-            required
-          />
-        </div>
-        {error && <p className="text-sm text-red-600">{error}</p>}
-        {status && <p className="text-sm text-green-700">{status}</p>}
-        <button
-          type="submit"
-          className="w-full rounded bg-black text-white py-2 disabled:opacity-60"
-          disabled={loading}
-        >
-          {loading ? "Sending..." : "Send reset link"}
-        </button>
-      </form>
+      <Card>
+        <CardHeader>
+          <CardTitle>Reset password</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <form onSubmit={requestReset} className="space-y-4">
+            <div className="space-y-2">
+              <Label htmlFor="email">Email</Label>
+              <Input
+                id="email"
+                type="email"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                required
+              />
+            </div>
+            {error && (
+              <Alert>
+                <AlertDescription>{error}</AlertDescription>
+              </Alert>
+            )}
+            {status && (
+              <Alert>
+                <AlertDescription className="text-green-700">{status}</AlertDescription>
+              </Alert>
+            )}
+            <Button type="submit" className="w-full" disabled={loading}>
+              {loading ? "Sending..." : "Send reset link"}
+            </Button>
+          </form>
+        </CardContent>
+      </Card>
     </div>
   );
 }

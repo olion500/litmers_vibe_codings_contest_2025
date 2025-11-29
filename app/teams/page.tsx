@@ -5,6 +5,10 @@ import { revalidatePath } from "next/cache";
 import { TeamRole } from "@prisma/client";
 import { redirect } from "next/navigation";
 import crypto from "node:crypto";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Badge } from "@/components/ui/badge";
 
 async function createTeam(formData: FormData) {
   "use server";
@@ -109,119 +113,120 @@ export default async function TeamsPage() {
 
   return (
     <main className="max-w-4xl mx-auto py-10 space-y-8">
-      <section className="rounded border p-6 bg-white shadow-sm">
-        <h1 className="text-2xl font-semibold mb-4">Teams</h1>
-        <form action={createTeam} className="flex gap-2">
-          <input
-            name="name"
-            placeholder="Team name"
-            minLength={1}
-            maxLength={50}
-            required
-            className="flex-1 rounded border px-3 py-2"
-          />
-          <button className="rounded bg-black text-white px-4 py-2" type="submit">
-            Create
-          </button>
-        </form>
-      </section>
+      <Card>
+        <CardHeader>
+          <CardTitle>Teams</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <form action={createTeam} className="flex flex-col gap-3 sm:flex-row">
+            <Input
+              name="name"
+              placeholder="Team name"
+              minLength={1}
+              maxLength={50}
+              required
+            />
+            <Button type="submit">Create</Button>
+          </form>
+        </CardContent>
+      </Card>
 
       <div className="space-y-6">
         {memberships.map((m) => (
-          <article key={m.id} className="rounded border p-5 bg-white shadow-sm space-y-3">
-            <div className="flex items-center justify-between">
+          <Card key={m.id}>
+            <CardContent className="space-y-3 pt-6">
+              <div className="flex items-center justify-between gap-3">
+                <div className="space-y-1">
+                  <h2 className="text-xl font-semibold">{m.team.name}</h2>
+                  <p className="text-sm text-muted-foreground">Your role: {m.role}</p>
+                </div>
+                <div className="flex flex-wrap gap-2 justify-end">
+                  {m.role !== TeamRole.MEMBER && (
+                    <form action={renameTeam} className="flex gap-2">
+                      <input type="hidden" name="teamId" value={m.teamId} />
+                      <Input
+                        name="name"
+                        defaultValue={m.team.name}
+                        minLength={1}
+                        maxLength={50}
+                        className="w-44"
+                      />
+                      <Button variant="outline" size="sm" type="submit">
+                        Rename
+                      </Button>
+                    </form>
+                  )}
+                  {m.role === TeamRole.OWNER ? (
+                    <form action={deleteTeam}>
+                      <input type="hidden" name="teamId" value={m.teamId} />
+                      <Button variant="destructive" size="sm" type="submit">
+                        Delete
+                      </Button>
+                    </form>
+                  ) : (
+                    <form action={leaveTeam}>
+                      <input type="hidden" name="teamId" value={m.teamId} />
+                      <Button variant="outline" size="sm" type="submit">
+                        Leave
+                      </Button>
+                    </form>
+                  )}
+                </div>
+              </div>
+
               <div>
-                <h2 className="text-xl font-semibold">{m.team.name}</h2>
-                <p className="text-sm text-gray-600">Your role: {m.role}</p>
-              </div>
-              <div className="flex gap-2">
-                {m.role !== TeamRole.MEMBER && (
-                  <form action={renameTeam} className="flex gap-2">
-                    <input type="hidden" name="teamId" value={m.teamId} />
-                    <input
-                      name="name"
-                      defaultValue={m.team.name}
-                      minLength={1}
-                      maxLength={50}
-                      className="rounded border px-2 py-1"
-                    />
-                    <button className="rounded border px-3 py-1" type="submit">
-                      Rename
-                    </button>
-                  </form>
-                )}
-                {m.role === TeamRole.OWNER ? (
-                  <form action={deleteTeam}>
-                    <input type="hidden" name="teamId" value={m.teamId} />
-                    <button className="rounded bg-red-600 text-white px-3 py-1" type="submit">
-                      Delete
-                    </button>
-                  </form>
-                ) : (
-                  <form action={leaveTeam}>
-                    <input type="hidden" name="teamId" value={m.teamId} />
-                    <button className="rounded border px-3 py-1" type="submit">
-                      Leave
-                    </button>
-                  </form>
-                )}
-              </div>
-            </div>
-
-            <div>
-              <h3 className="font-semibold">Members</h3>
-              <ul className="text-sm text-gray-700 space-y-1">
-                {m.team.members.map((mem) => (
-                  <li key={mem.id}>
-                    {mem.user?.email || "user"} — {mem.role}
-                  </li>
-                ))}
-              </ul>
-            </div>
-
-            {(m.role === TeamRole.OWNER || m.role === TeamRole.ADMIN) && (
-              <div className="space-y-2">
-                <h3 className="font-semibold">Invites (pending)</h3>
-                <ul className="text-sm text-gray-700 space-y-1">
-                  {m.team.invites.length === 0 && <li>No pending invites</li>}
-                  {m.team.invites.map((inv) => (
-                    <li key={inv.id}>
-                      {inv.email} — expires {inv.expiresAt.toISOString().slice(0, 10)}
+                <h3 className="font-semibold">Members</h3>
+                <ul className="text-sm text-foreground/80 space-y-1">
+                  {m.team.members.map((mem) => (
+                    <li key={mem.id} className="flex items-center gap-2">
+                      <span>{mem.user?.email || "user"}</span>
+                      <Badge variant="secondary">{mem.role}</Badge>
                     </li>
                   ))}
                 </ul>
-                <form action={sendInvite} className="flex gap-2">
-                  <input type="hidden" name="teamId" value={m.teamId} />
-                  <input
-                    name="email"
-                    type="email"
-                    placeholder="invitee@example.com"
-                    required
-                    className="flex-1 rounded border px-3 py-2"
-                  />
-                  <button className="rounded bg-black text-white px-4 py-2" type="submit">
-                    Invite
-                  </button>
-                </form>
               </div>
-            )}
 
-            <div>
-              <h3 className="font-semibold">Recent activity</h3>
-              <ul className="text-sm text-gray-700 space-y-1">
-                {m.team.activities.length === 0 && <li>No activity yet.</li>}
-                {m.team.activities.map((a) => (
-                  <li key={a.id}>
-                    {a.message} — {a.createdAt.toISOString().slice(0, 10)}
-                  </li>
-                ))}
-              </ul>
-            </div>
-          </article>
+              {(m.role === TeamRole.OWNER || m.role === TeamRole.ADMIN) && (
+                <div className="space-y-2">
+                  <h3 className="font-semibold">Invites (pending)</h3>
+                  <ul className="text-sm text-foreground/80 space-y-1">
+                    {m.team.invites.length === 0 && <li>No pending invites</li>}
+                    {m.team.invites.map((inv) => (
+                      <li key={inv.id}>
+                        {inv.email} — expires {inv.expiresAt.toISOString().slice(0, 10)}
+                      </li>
+                    ))}
+                  </ul>
+                  <form action={sendInvite} className="flex flex-col gap-2 sm:flex-row">
+                    <input type="hidden" name="teamId" value={m.teamId} />
+                    <Input
+                      name="email"
+                      type="email"
+                      placeholder="invitee@example.com"
+                      required
+                    />
+                    <Button type="submit">Invite</Button>
+                  </form>
+                </div>
+              )}
+
+              <div>
+                <h3 className="font-semibold">Recent activity</h3>
+                <ul className="text-sm text-foreground/80 space-y-1">
+                  {m.team.activities.length === 0 && <li>No activity yet.</li>}
+                  {m.team.activities.map((a) => (
+                    <li key={a.id}>
+                      {a.message} — {a.createdAt.toISOString().slice(0, 10)}
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            </CardContent>
+          </Card>
         ))}
 
         {memberships.length === 0 && (
-          <p className="text-sm text-gray-600">You have no teams yet. Create one above.</p>
+          <p className="text-sm text-muted-foreground">You have no teams yet. Create one above.</p>
         )}
       </div>
     </main>

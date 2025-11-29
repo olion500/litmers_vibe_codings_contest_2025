@@ -4,6 +4,12 @@ import { notFound, redirect } from "next/navigation";
 import { revalidatePath } from "next/cache";
 import { commentSchemas } from "@/lib/validation";
 import { softDeleteComment, updateComment } from "@/lib/comments";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
+import { Textarea } from "@/components/ui/textarea";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Checkbox } from "@/components/ui/checkbox";
 
 export default async function IssueDetailPage({ params, searchParams }: { params: { projectId: string; issueId: string }; searchParams?: { [key: string]: string | string[] | undefined } }) {
   const session = await requireSession();
@@ -72,23 +78,29 @@ export default async function IssueDetailPage({ params, searchParams }: { params
     <main className="max-w-4xl mx-auto py-10 space-y-6">
       <div className="flex items-center justify-between">
         <div>
-          <p className="text-sm text-gray-500">Project {issue.project.name}</p>
+          <p className="text-sm text-muted-foreground">Project {issue.project.name}</p>
           <h1 className="text-3xl font-semibold">{issue.title}</h1>
-          <p className="text-sm text-gray-600">Status: {issue.status.name}</p>
+          <p className="text-sm text-muted-foreground">Status: {issue.status.name}</p>
         </div>
-        <span className="text-xs px-3 py-1 rounded bg-gray-900 text-white">{issue.priority}</span>
+        <Badge>{issue.priority}</Badge>
       </div>
 
       {issue.description && (
-        <section className="rounded border p-4 bg-white shadow-sm space-y-2">
-          <h2 className="text-lg font-semibold">Description</h2>
-          <p className="whitespace-pre-line text-gray-800">{issue.description}</p>
-        </section>
+        <Card>
+          <CardHeader className="pb-2">
+            <CardTitle>Description</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <p className="whitespace-pre-line text-foreground/80">{issue.description}</p>
+          </CardContent>
+        </Card>
       )}
 
-      <section className="rounded border p-4 bg-white shadow-sm space-y-2">
-        <h2 className="text-lg font-semibold">Details</h2>
-        <div className="text-sm text-gray-700 space-y-1">
+      <Card>
+        <CardHeader className="pb-2">
+          <CardTitle>Details</CardTitle>
+        </CardHeader>
+        <CardContent className="text-sm text-foreground/80 space-y-1">
           <p>Assignee: {issue.assignee?.name || issue.assignee?.email || "Unassigned"}</p>
           <p>Owner: {issue.owner?.name || issue.owner?.email}</p>
           <p>Due: {issue.dueDate ? new Date(issue.dueDate).toLocaleDateString() : "No due date"}</p>
@@ -99,91 +111,101 @@ export default async function IssueDetailPage({ params, searchParams }: { params
                 {l.label.name}
               </span>
             ))}
-            {issue.labels.length === 0 && <span className="text-xs text-gray-500">None</span>}
+            {issue.labels.length === 0 && <span className="text-xs text-muted-foreground">None</span>}
           </div>
-        </div>
-      </section>
+        </CardContent>
+      </Card>
 
-      <section className="rounded border p-4 bg-white shadow-sm space-y-2">
-        <h2 className="text-lg font-semibold">Subtasks</h2>
-        <ul className="space-y-1 text-sm text-gray-700">
-          {issue.subtasks.map((st) => (
-            <li key={st.id} className="flex items-center gap-2">
-              <input type="checkbox" checked={st.completed} readOnly />
-              <span className={st.completed ? "line-through" : ""}>{st.title}</span>
-            </li>
-          ))}
-          {issue.subtasks.length === 0 && <li className="text-xs text-gray-500">No subtasks</li>}
-        </ul>
-      </section>
+      <Card>
+        <CardHeader className="pb-2">
+          <CardTitle>Subtasks</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <ul className="space-y-1 text-sm text-foreground/80">
+            {issue.subtasks.map((st) => (
+              <li key={st.id} className="flex items-center gap-2">
+                <Checkbox checked={st.completed} readOnly className="h-4 w-4" />
+                <span className={st.completed ? "line-through" : ""}>{st.title}</span>
+              </li>
+            ))}
+            {issue.subtasks.length === 0 && <li className="text-xs text-muted-foreground">No subtasks</li>}
+          </ul>
+        </CardContent>
+      </Card>
 
-      <section className="rounded border p-4 bg-white shadow-sm space-y-2">
-        <h2 className="text-lg font-semibold">Change History</h2>
-        <ul className="space-y-2 text-sm text-gray-700">
-          {issue.histories.map((h) => (
-            <li key={h.id} className="border-b pb-2">
-              <div className="flex justify-between">
-                <span className="font-medium">{h.field}</span>
-                <span className="text-xs text-gray-500">{new Date(h.createdAt).toLocaleString()}</span>
-              </div>
-              <p className="text-xs text-gray-600">By {h.actor?.name || h.actor?.email}</p>
-              <p className="text-xs">{h.oldValue ?? "(none)"} → {h.newValue ?? "(none)"}</p>
-            </li>
-          ))}
-          {issue.histories.length === 0 && <li className="text-xs text-gray-500">No changes yet.</li>}
-        </ul>
-      </section>
-
-      <section className="rounded border p-4 bg-white shadow-sm space-y-3">
-        <div className="flex items-center justify-between">
-          <h2 className="text-lg font-semibold">Comments</h2>
-          <p className="text-xs text-gray-500">{commentsTotal} total</p>
-        </div>
-        <form action={addComment} className="space-y-2">
-          <textarea name="content" rows={3} maxLength={2000} required className="w-full rounded border px-3 py-2" placeholder="Add a comment" />
-          <div className="flex justify-end">
-            <button type="submit" className="rounded bg-gray-900 text-white px-3 py-1">Post</button>
-          </div>
-        </form>
-        <div className="space-y-3">
-          {comments.map((c) => {
-            const canManage = c.authorId === session.user.id || issue.project.team.ownerId === session.user.id || issue.project.team.members.some((m) => m.userId === session.user.id && (m.role === "OWNER" || m.role === "ADMIN"));
-            return (
-              <article key={c.id} className="border rounded p-3 space-y-1 bg-gray-50">
-                <div className="flex justify-between text-xs text-gray-600">
-                  <span>{c.author?.name || c.author?.email || "User"}</span>
-                  <span>{new Date(c.createdAt).toLocaleString()}</span>
+      <Card>
+        <CardHeader className="pb-2">
+          <CardTitle>Change History</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <ul className="space-y-2 text-sm text-foreground/80">
+            {issue.histories.map((h) => (
+              <li key={h.id} className="border-b pb-2">
+                <div className="flex justify-between">
+                  <span className="font-medium">{h.field}</span>
+                  <span className="text-xs text-muted-foreground">{new Date(h.createdAt).toLocaleString()}</span>
                 </div>
-                <p className="text-sm text-gray-800 whitespace-pre-line">{c.content}</p>
-                {canManage && (
-                  <div className="flex gap-2 text-[11px] text-blue-600">
-                    <form action={removeComment}>
-                      <input type="hidden" name="commentId" value={c.id} />
-                      <button className="underline">Delete</button>
-                    </form>
-                    <form action={editComment} className="flex gap-1 items-center">
-                      <input type="hidden" name="commentId" value={c.id} />
-                      <input name="content" defaultValue={c.content} className="rounded border px-2 py-1 text-xs" maxLength={2000} />
-                      <button className="underline">Save</button>
-                    </form>
+                <p className="text-xs text-muted-foreground">By {h.actor?.name || h.actor?.email}</p>
+                <p className="text-xs">{h.oldValue ?? "(none)"} → {h.newValue ?? "(none)"}</p>
+              </li>
+            ))}
+            {issue.histories.length === 0 && <li className="text-xs text-muted-foreground">No changes yet.</li>}
+          </ul>
+        </CardContent>
+      </Card>
+
+      <Card>
+        <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+          <CardTitle>Comments</CardTitle>
+          <p className="text-xs text-muted-foreground">{commentsTotal} total</p>
+        </CardHeader>
+        <CardContent className="space-y-3">
+          <form action={addComment} className="space-y-2">
+            <Textarea name="content" rows={3} maxLength={2000} required placeholder="Add a comment" />
+            <div className="flex justify-end">
+              <Button type="submit" size="sm">Post</Button>
+            </div>
+          </form>
+          <div className="space-y-3">
+            {comments.map((c) => {
+              const canManage = c.authorId === session.user.id || issue.project.team.ownerId === session.user.id || issue.project.team.members.some((m) => m.userId === session.user.id && (m.role === "OWNER" || m.role === "ADMIN"));
+              return (
+                <article key={c.id} className="border rounded p-3 space-y-1 bg-muted/40">
+                  <div className="flex justify-between text-xs text-muted-foreground">
+                    <span>{c.author?.name || c.author?.email || "User"}</span>
+                    <span>{new Date(c.createdAt).toLocaleString()}</span>
                   </div>
-                )}
-              </article>
-            );
-          })}
-          {comments.length === 0 && <p className="text-sm text-gray-500">No comments yet.</p>}
-        </div>
-        {commentsTotal > pageSize && (
-          <div className="flex justify-between text-xs text-blue-600">
-            {page > 1 ? (
-              <a href={`?page=${page - 1}`} className="underline">Previous</a>
-            ) : <span />}
-            {(page * pageSize) < commentsTotal ? (
-              <a href={`?page=${page + 1}`} className="underline">Next</a>
-            ) : <span />}
+                  <p className="text-sm text-foreground whitespace-pre-line">{c.content}</p>
+                  {canManage && (
+                    <div className="flex gap-2 text-[11px] text-primary">
+                      <form action={removeComment}>
+                        <input type="hidden" name="commentId" value={c.id} />
+                        <Button variant="link" size="sm" className="h-auto px-1">Delete</Button>
+                      </form>
+                      <form action={editComment} className="flex gap-1 items-center">
+                        <input type="hidden" name="commentId" value={c.id} />
+                        <Input name="content" defaultValue={c.content} className="h-8 text-xs" maxLength={2000} />
+                        <Button variant="link" size="sm" className="h-auto px-1">Save</Button>
+                      </form>
+                    </div>
+                  )}
+                </article>
+              );
+            })}
+            {comments.length === 0 && <p className="text-sm text-muted-foreground">No comments yet.</p>}
           </div>
-        )}
-      </section>
+          {commentsTotal > pageSize && (
+            <div className="flex justify-between text-xs text-primary">
+              {page > 1 ? (
+                <a href={`?page=${page - 1}`} className="underline">Previous</a>
+              ) : <span />}
+              {(page * pageSize) < commentsTotal ? (
+                <a href={`?page=${page + 1}`} className="underline">Next</a>
+              ) : <span />}
+            </div>
+          )}
+        </CardContent>
+      </Card>
     </main>
   );
 }

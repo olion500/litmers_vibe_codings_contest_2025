@@ -3,6 +3,11 @@ import { profileSchemas } from "@/lib/validation";
 import { validatePassword, hashPassword, verifyPassword } from "@/lib/password";
 import { redirect } from "next/navigation";
 import { clearSessionCookiesAndRecord, requireSession } from "@/lib/session";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Button } from "@/components/ui/button";
+import { Checkbox } from "@/components/ui/checkbox";
 
 async function getUser(userId: string) {
   return prisma.user.findUnique({ where: { id: userId, deletedAt: null } });
@@ -119,112 +124,120 @@ export default async function ProfilePage({
     <main className="max-w-3xl mx-auto py-12 space-y-10">
       <header>
         <h1 className="text-3xl font-semibold">Profile</h1>
-        <p className="text-gray-600">Update your details, change password, or delete your account.</p>
-        {error && <p className="text-sm text-red-600 mt-2">Error: {error.replace(/-/g, " ")}</p>}
+        <p className="text-muted-foreground">Update your details, change password, or delete your account.</p>
+        {error && <p className="text-sm text-destructive mt-2">Error: {error.replace(/-/g, " ")}</p>}
         {success && <p className="text-sm text-green-700 mt-2">Saved: {success.replace(/-/g, " ")}</p>}
       </header>
 
-      <section className="rounded border p-6 space-y-4 bg-white shadow-sm">
-        <h2 className="text-xl font-semibold">Profile info</h2>
-        <form action={updateProfile} className="space-y-4">
-          <div>
-            <label className="block text-sm font-medium">Name</label>
-            <input
-              name="name"
-              defaultValue={user.name ?? ""}
-              required
-              minLength={1}
-              maxLength={50}
-              className="mt-1 w-full rounded border px-3 py-2"
-            />
-          </div>
-          <div>
-            <label className="block text-sm font-medium">Avatar URL</label>
-            <input
-              name="image"
-              defaultValue={user.image ?? ""}
-              placeholder="https://..."
-              className="mt-1 w-full rounded border px-3 py-2"
-            />
-            <p className="text-xs text-gray-500">Upload support can be added later; paste an image URL for now.</p>
-          </div>
-          <button className="rounded bg-black text-white px-4 py-2">Save profile</button>
-        </form>
-      </section>
-
-      <section className="rounded border p-6 space-y-4 bg-white shadow-sm">
-        <div className="flex items-center justify-between">
-          <h2 className="text-xl font-semibold">Change password</h2>
-          {isOAuthOnly && <span className="text-xs text-gray-600">Unavailable for Google-only accounts</span>}
-        </div>
-        <form action={changePassword} className="space-y-4">
-          <fieldset disabled={isOAuthOnly} className="space-y-4">
-            <div>
-              <label className="block text-sm font-medium">Current password</label>
-              <input
-                name="currentPassword"
-                type="password"
-                className="mt-1 w-full rounded border px-3 py-2"
-                minLength={6}
-                maxLength={100}
+      <Card>
+        <CardHeader>
+          <CardTitle>Profile info</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <form action={updateProfile} className="space-y-4">
+            <div className="space-y-2">
+              <Label htmlFor="name">Name</Label>
+              <Input
+                id="name"
+                name="name"
+                defaultValue={user.name ?? ""}
                 required
+                minLength={1}
+                maxLength={50}
               />
             </div>
-            <div>
-              <label className="block text-sm font-medium">New password</label>
-              <input
-                name="newPassword"
-                type="password"
-                className="mt-1 w-full rounded border px-3 py-2"
-                minLength={6}
-                maxLength={100}
-                required
+            <div className="space-y-2">
+              <Label htmlFor="image">Avatar URL</Label>
+              <Input
+                id="image"
+                name="image"
+                defaultValue={user.image ?? ""}
+                placeholder="https://..."
               />
+              <p className="text-xs text-muted-foreground">Upload support can be added later; paste an image URL for now.</p>
             </div>
-            <button className="rounded bg-black text-white px-4 py-2" type="submit">
-              Update password
-            </button>
-          </fieldset>
-        </form>
-      </section>
+            <Button type="submit">Save profile</Button>
+          </form>
+        </CardContent>
+      </Card>
 
-      <section className="rounded border p-6 space-y-4 bg-white shadow-sm">
-        <h2 className="text-xl font-semibold text-red-700">Delete account</h2>
-        <p className="text-sm text-gray-700">
-          This will soft delete your account. You cannot delete your account while owning teams; transfer ownership first.
-        </p>
+      <Card>
+        <CardHeader className="flex flex-row items-center justify-between space-y-0">
+          <CardTitle>Change password</CardTitle>
+          {isOAuthOnly && <span className="text-xs text-muted-foreground">Unavailable for Google-only accounts</span>}
+        </CardHeader>
+        <CardContent>
+          <form action={changePassword} className="space-y-4">
+            <fieldset disabled={isOAuthOnly} className="space-y-4">
+              <div className="space-y-2">
+                <Label htmlFor="currentPassword">Current password</Label>
+                <Input
+                  id="currentPassword"
+                  name="currentPassword"
+                  type="password"
+                  minLength={6}
+                  maxLength={100}
+                  required
+                />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="newPassword">New password</Label>
+                <Input
+                  id="newPassword"
+                  name="newPassword"
+                  type="password"
+                  minLength={6}
+                  maxLength={100}
+                  required
+                />
+              </div>
+              <Button type="submit">Update password</Button>
+            </fieldset>
+          </form>
+        </CardContent>
+      </Card>
 
-        <form action={deleteAccount} className="space-y-4">
-          {isOAuthOnly ? (
-            <input type="hidden" name="method" value="oauth" />
-          ) : (
-            <input type="hidden" name="method" value="password" />
-          )}
+      <Card>
+        <CardHeader>
+          <CardTitle className="text-red-700">Delete account</CardTitle>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          <p className="text-sm text-foreground/80">
+            This will soft delete your account. You cannot delete your account while owning teams; transfer ownership first.
+          </p>
 
-          {isOAuthOnly ? (
-            <label className="inline-flex items-center gap-2 text-sm">
-              <input type="checkbox" name="confirm" value="true" required className="h-4 w-4" />
-              I understand this will delete my account.
-            </label>
-          ) : (
-            <div>
-              <label className="block text-sm font-medium">Confirm with password</label>
-              <input
-                name="password"
-                type="password"
-                className="mt-1 w-full rounded border px-3 py-2"
-                minLength={6}
-                maxLength={100}
-                required
-              />
-            </div>
-          )}
+          <form action={deleteAccount} className="space-y-4">
+            {isOAuthOnly ? (
+              <input type="hidden" name="method" value="oauth" />
+            ) : (
+              <input type="hidden" name="method" value="password" />
+            )}
 
-          <button className="rounded bg-red-600 text-white px-4 py-2" type="submit">
-            Delete account
-          </button>
-        </form>
-      </section>
+            {isOAuthOnly ? (
+              <label className="inline-flex items-center gap-2 text-sm">
+                <Checkbox name="confirm" value="true" required className="h-4 w-4" />
+                I understand this will delete my account.
+              </label>
+            ) : (
+              <div className="space-y-2">
+                <Label htmlFor="password">Confirm with password</Label>
+                <Input
+                  id="password"
+                  name="password"
+                  type="password"
+                  minLength={6}
+                  maxLength={100}
+                  required
+                />
+              </div>
+            )}
+
+            <Button variant="destructive" type="submit">
+              Delete account
+            </Button>
+          </form>
+        </CardContent>
+      </Card>
     </main>
   );
 }
