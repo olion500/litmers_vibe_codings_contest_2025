@@ -1,8 +1,8 @@
 ## 1. Foundations & Auth (FR-001~007)
 - [x] 1.1 Lock stack choice (FE/BE framework, DB, hosting) and scaffold repo with lint/test scripts wired to CI.
-- [ ] 1.2 Implement email/password signup/login/logout with 24h tokens; enforce length rules; add session storage.
-- [ ] 1.3 Password reset: generate 1h tokens, send real email, reset form flow; cover duplicate/expired token errors.
-- [ ] 1.4 Google OAuth as separate auth path; auto-provision user; disable password change for OAuth-only users.
+- [x] 1.2 Implement email/password signup/login/logout with 24h tokens; enforce length rules; add session storage.
+- [x] 1.3 Password reset: generate 1h tokens, send real email, reset form flow; cover duplicate/expired token errors.
+- [x] 1.4 Google OAuth as separate auth path; auto-provision user; disable password change for OAuth-only users.
 - [ ] 1.5 Profile view/edit (name, avatar upload/URL), password change (non-OAuth), and account deletion with team ownership guard + soft delete.
 
 ## 2. Teams & Access Control (FR-010~019, 070, 071)
