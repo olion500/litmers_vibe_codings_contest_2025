@@ -4,14 +4,7 @@ import { notFound, redirect } from "next/navigation";
 import { revalidatePath } from "next/cache";
 import { issueSchemas } from "@/lib/validation";
 import type { IssuePriority } from "@prisma/client";
-import {
-  createIssue,
-  moveIssue,
-  createSubtask as createSubtaskHelper,
-  createLabel as createLabelHelper,
-  updateSubtask as updateSubtaskHelper,
-  createStatus as createStatusHelper,
-} from "@/lib/issues";
+import { createIssue, createLabel as createLabelHelper, createStatus as createStatusHelper } from "@/lib/issues";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -26,10 +19,11 @@ export default async function ProjectDetailPage({
   params,
   searchParams,
 }: {
-  params: { projectId: string };
+  params: Promise<{ projectId: string }> | { projectId: string };
   searchParams?: Promise<{ [key: string]: string | string[] | undefined }> | { [key: string]: string | string[] | undefined };
 }) {
   const session = await requireSession();
+  const p = typeof params === "function" || params instanceof Promise ? await params : params;
   const sp = typeof searchParams === "function" || searchParams instanceof Promise ? await searchParams : searchParams;
   const statusFilter = typeof sp?.status === "string" ? sp.status.split(",") : [];
   const assigneeFilter = typeof sp?.assignee === "string" ? sp.assignee : undefined;
@@ -41,7 +35,7 @@ export default async function ProjectDetailPage({
 
   const project = await prisma.project.findFirst({
     where: {
-      id: params.projectId,
+      id: p.projectId,
       deletedAt: null,
       team: { members: { some: { userId: session.user.id, deletedAt: null } }, deletedAt: null },
     },
@@ -88,19 +82,6 @@ export default async function ProjectDetailPage({
     revalidatePath(`/projects/${params.projectId}`);
   }
 
-  async function updateWip(formData: FormData) {
-    "use server";
-    const session = await requireSession();
-    const statusId = String(formData.get("statusId"));
-    const wipLimit = Number(formData.get("wipLimit"));
-    const status = await prisma.status.findFirst({ where: { id: statusId, projectId: params.projectId } });
-    if (!status) redirect(`/projects/${params.projectId}?error=status`);
-    const membership = await prisma.teamMember.findFirst({ where: { teamId: project.teamId, userId: session.user.id, deletedAt: null } });
-    if (!membership || membership.role === "MEMBER") redirect(`/projects/${params.projectId}?error=forbidden`);
-    await prisma.status.update({ where: { id: statusId, projectId: params.projectId }, data: { wipLimit } });
-    revalidatePath(`/projects/${params.projectId}`);
-  }
-
   async function addIssue(formData: FormData) {
     "use server";
     const session = await requireSession();
@@ -134,32 +115,6 @@ export default async function ProjectDetailPage({
       const message = err instanceof Error ? err.message : "label-limit";
       redirect(`/projects/${params.projectId}?error=${encodeURIComponent(message)}`);
     }
-    revalidatePath(`/projects/${params.projectId}`);
-  }
-
-  const moveAction = async (issueId: string, toStatusId: string, toOrder: number) => {
-    "use server";
-    const session = await requireSession();
-    await moveIssue(issueId, session.user.id, toStatusId, toOrder);
-    revalidatePath(`/projects/${params.projectId}`);
-  };
-
-  async function addSubtask(formData: FormData) {
-    "use server";
-    const session = await requireSession();
-    const issueId = String(formData.get("issueId"));
-    const title = String(formData.get("title"));
-    if (!title) redirect(`/projects/${params.projectId}?error=subtask`);
-    await createSubtaskHelper(issueId, session.user.id, title);
-    revalidatePath(`/projects/${params.projectId}`);
-  }
-
-  async function toggleSubtask(formData: FormData) {
-    "use server";
-    const session = await requireSession();
-    const subtaskId = String(formData.get("subtaskId"));
-    const completed = formData.get("completed") === "true";
-    await updateSubtaskHelper(subtaskId, session.user.id, { completed });
     revalidatePath(`/projects/${params.projectId}`);
   }
 
@@ -337,15 +292,7 @@ export default async function ProjectDetailPage({
           </form>
           <p className="text-xs text-muted-foreground mt-1">Up to 5 custom statuses. WIP 1-50 or 0 for unlimited.</p>
         </details>
-        <KanbanBoard
-          projectId={project.id}
-          statuses={project.statuses}
-          issues={project.issues}
-          moveIssue={moveAction}
-          updateWip={updateWip}
-          toggleSubtask={toggleSubtask}
-          addSubtask={addSubtask}
-        />
+        <KanbanBoard projectId={project.id} statuses={project.statuses} issues={project.issues} />
       </section>
       </main>
     </AppShell>

@@ -7,6 +7,12 @@ import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Checkbox } from "@/components/ui/checkbox";
 import { cn } from "@/lib/utils";
+import {
+  moveIssueAction,
+  updateWipAction,
+  toggleSubtaskAction,
+  addSubtaskAction,
+} from "@/app/projects/[projectId]/actions";
 
 export type KanbanStatus = {
   id: string;
@@ -30,13 +36,9 @@ type KanbanBoardProps = {
   projectId: string;
   statuses: KanbanStatus[];
   issues: KanbanIssue[];
-  moveIssue: (issueId: string, statusId: string, toOrder: number) => Promise<void>;
-  updateWip: (formData: FormData) => Promise<void>;
-  toggleSubtask: (formData: FormData) => Promise<void>;
-  addSubtask: (formData: FormData) => Promise<void>;
 };
 
-export function KanbanBoard({ projectId, statuses, issues, moveIssue, updateWip, toggleSubtask, addSubtask }: KanbanBoardProps) {
+export function KanbanBoard({ projectId, statuses, issues }: KanbanBoardProps) {
   const [draggingId, setDraggingId] = useState<string | null>(null);
   const [pending, startTransition] = useTransition();
 
@@ -51,7 +53,14 @@ export function KanbanBoard({ projectId, statuses, issues, moveIssue, updateWip,
 
   const handleDrop = (statusId: string, index: number) => {
     if (!draggingId) return;
-    startTransition(() => moveIssue(draggingId, statusId, index));
+    startTransition(() => {
+      const fd = new FormData();
+      fd.append("issueId", draggingId);
+      fd.append("statusId", statusId);
+      fd.append("toOrder", String(index));
+      fd.append("projectId", projectId);
+      moveIssueAction(fd);
+    });
     setDraggingId(null);
   };
 
@@ -76,8 +85,9 @@ export function KanbanBoard({ projectId, statuses, issues, moveIssue, updateWip,
                   <p className="font-semibold" style={{ color: status.color }}>
                     {status.name}
                   </p>
-                  <form action={updateWip} className="flex items-center gap-1 text-xs text-muted-foreground mt-1">
+                  <form action={updateWipAction} className="flex items-center gap-1 text-xs text-muted-foreground mt-1">
                     <input type="hidden" name="statusId" value={status.id} />
+                    <input type="hidden" name="projectId" value={projectId} />
                     <span>WIP</span>
                     <Input type="number" name="wipLimit" min={0} max={50} defaultValue={status.wipLimit ?? 0} className="w-16 px-2 py-1" />
                     <span className="text-[11px]">(0 = ∞)</span>
@@ -129,7 +139,8 @@ export function KanbanBoard({ projectId, statuses, issues, moveIssue, updateWip,
                       Subtasks {issue.subtasks.filter((s) => s.completed).length}/{issue.subtasks.length}
                     </p>
                     {issue.subtasks.map((st) => (
-                      <form key={st.id} action={toggleSubtask} className="flex items-center gap-2 text-xs">
+                      <form key={st.id} action={toggleSubtaskAction} className="flex items-center gap-2 text-xs">
+                        <input type="hidden" name="projectId" value={projectId} />
                         <input type="hidden" name="subtaskId" value={st.id} />
                         <input type="hidden" name="completed" value={st.completed ? "false" : "true"} />
                         <Checkbox checked={st.completed} readOnly className="h-3.5 w-3.5" />
@@ -139,7 +150,8 @@ export function KanbanBoard({ projectId, statuses, issues, moveIssue, updateWip,
                         </Button>
                       </form>
                     ))}
-                    <form action={addSubtask} className="flex items-center gap-2 text-xs">
+                    <form action={addSubtaskAction} className="flex items-center gap-2 text-xs">
+                      <input type="hidden" name="projectId" value={projectId} />
                       <input type="hidden" name="issueId" value={issue.id} />
                       <Input name="title" placeholder="New subtask" className="flex-1" />
                       <Button type="submit" size="sm" className="h-8">
