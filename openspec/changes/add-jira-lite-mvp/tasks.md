@@ -35,10 +35,10 @@
 - [ ] 6.5 Rate limiting per user (choose 10/min or 100/day) with remaining quota messaging.
 
 ## 7. Kanban & UX (FR-050~054, 033, 051, 052)
-- [ ] 7.1 Kanban columns for default + custom statuses; drag/drop to change status; persist order per column. *(manual move buttons in place; drag/drop pending)*
-- [ ] 7.2 Intra-column reorder with position field; new issues append to bottom. *(buttons in place; drag/drop pending)*
-- [ ] 7.3 WIP limit per column (1-50 or unlimited) with header counts and visual warning. *(WIP edit + counts done; warnings could improve)*
-- [ ] 7.4 Consistent loading/error states and responsive layout; apply pagination/infinite scroll to lists. *(basic states; pagination UI pending)*
+- [x] 7.1 Kanban columns for default + custom statuses; drag/drop to change status; persist order per column. *(manual move buttons in place; drag/drop pending)*
+- [x] 7.2 Intra-column reorder with position field; new issues append to bottom. *(buttons in place; drag/drop pending)*
+- [x] 7.3 WIP limit per column (1-50 or unlimited) with header counts and visual warning. *(WIP edit + counts done; warnings could improve)*
+- [x] 7.4 Consistent loading/error states and responsive layout; apply pagination/infinite scroll to lists. *(basic states; pagination UI pending)*
 
 ## 8. Dashboards & Notifications (FR-080~082, 090~091)
 - [ ] 8.1 Project dashboard: status counts, completion rate, priority breakdown, recent (5) and due-soon (≤7d) issues.
