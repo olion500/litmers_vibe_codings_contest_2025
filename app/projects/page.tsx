@@ -3,7 +3,7 @@ import { requireSession } from "@/lib/session";
 import { projectSchemas } from "@/lib/validation";
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
@@ -106,61 +106,59 @@ export default async function ProjectsPage() {
   return (
     <AppShell>
       <main className="max-w-5xl mx-auto py-6 space-y-8">
-      <Card>
-        <CardHeader className="flex items-center justify-between">
-          <CardTitle>Projects</CardTitle>
-          <Dialog>
-            <DialogTrigger asChild>
-              <Button size="sm">New project</Button>
-            </DialogTrigger>
-            <DialogContent className="sm:max-w-2xl">
-              <DialogHeader>
-                <DialogTitle>Create project</DialogTitle>
-              </DialogHeader>
-              <form action={createProject} className="grid grid-cols-1 md:grid-cols-3 gap-3 items-start">
-                <div className="space-y-2 md:col-span-3">
-                  <Label htmlFor="teamId">Team</Label>
-                  <select
-                    name="teamId"
-                    id="teamId"
-                    required
-                    defaultValue=""
-                    className="w-full rounded-md border border-input bg-background px-3 py-2 text-sm shadow-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
-                  >
-                    <option value="" disabled>
-                      Select team
-                    </option>
-                    {teams.map((t) => (
-                      <option key={t.id} value={t.id}>
-                        {t.name}
-                      </option>
-                    ))}
-                  </select>
-                </div>
-                <div className="space-y-2 md:col-span-3">
-                  <Label htmlFor="name">Name</Label>
-                  <Input name="name" id="name" required minLength={1} maxLength={100} />
-                </div>
-                <div className="md:col-span-3 space-y-2">
-                  <Label htmlFor="description">Description (markdown)</Label>
-                  <Textarea name="description" id="description" maxLength={2000} rows={4} />
-                </div>
-                <div className="md:col-span-3 flex justify-end gap-2">
-                  <DialogClose asChild>
-                    <Button variant="outline" type="button">
-                      Cancel
-                    </Button>
-                  </DialogClose>
-                  <Button type="submit">Create</Button>
-                </div>
-              </form>
-            </DialogContent>
-          </Dialog>
-        </CardHeader>
-        <CardContent>
+      <header className="flex items-center justify-between">
+        <div className="space-y-1">
+          <h1 className="text-2xl font-semibold">Projects</h1>
           <p className="text-sm text-muted-foreground">Create projects and manage favorites, archive, and stats.</p>
-        </CardContent>
-      </Card>
+        </div>
+        <Dialog>
+          <DialogTrigger asChild>
+            <Button size="sm">New project</Button>
+          </DialogTrigger>
+          <DialogContent className="sm:max-w-2xl">
+            <DialogHeader>
+              <DialogTitle>Create project</DialogTitle>
+            </DialogHeader>
+            <form action={createProject} className="grid grid-cols-1 md:grid-cols-3 gap-3 items-start">
+              <div className="space-y-2 md:col-span-3">
+                <Label htmlFor="teamId">Team</Label>
+                <select
+                  name="teamId"
+                  id="teamId"
+                  required
+                  defaultValue=""
+                  className="w-full rounded-md border border-input bg-background px-3 py-2 text-sm shadow-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+                >
+                  <option value="" disabled>
+                    Select team
+                  </option>
+                  {teams.map((t) => (
+                    <option key={t.id} value={t.id}>
+                      {t.name}
+                    </option>
+                  ))}
+                </select>
+              </div>
+              <div className="space-y-2 md:col-span-3">
+                <Label htmlFor="name">Name</Label>
+                <Input name="name" id="name" required minLength={1} maxLength={100} />
+              </div>
+              <div className="md:col-span-3 space-y-2">
+                <Label htmlFor="description">Description (markdown)</Label>
+                <Textarea name="description" id="description" maxLength={2000} rows={4} />
+              </div>
+              <div className="md:col-span-3 flex justify-end gap-2">
+                <DialogClose asChild>
+                  <Button variant="outline" type="button">
+                    Cancel
+                  </Button>
+                </DialogClose>
+                <Button type="submit">Create</Button>
+              </div>
+            </form>
+          </DialogContent>
+        </Dialog>
+      </header>
 
       <div className="space-y-4">
         {projects.map((p) => (
