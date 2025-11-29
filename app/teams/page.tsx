@@ -10,6 +10,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { AppShell } from "@/components/sidebar";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 
 async function createTeam(formData: FormData) {
   "use server";
@@ -116,20 +117,36 @@ export default async function TeamsPage() {
     <AppShell>
       <main className="max-w-4xl mx-auto py-6 space-y-8">
       <Card>
-        <CardHeader>
+        <CardHeader className="flex flex-row items-center justify-between space-y-0">
           <CardTitle>Teams</CardTitle>
+          <Dialog>
+            <DialogTrigger asChild>
+              <Button size="sm">New team</Button>
+            </DialogTrigger>
+            <DialogContent className="sm:max-w-md">
+              <DialogHeader>
+                <DialogTitle>Create a team</DialogTitle>
+              </DialogHeader>
+              <form action={createTeam} className="space-y-4">
+                <Input
+                  name="name"
+                  placeholder="Team name"
+                  minLength={1}
+                  maxLength={50}
+                  required
+                />
+                <div className="flex justify-end gap-2">
+                  <Button variant="outline" type="button" onClick={() => (document?.activeElement as HTMLElement | null)?.blur()}>
+                    Cancel
+                  </Button>
+                  <Button type="submit">Create</Button>
+                </div>
+              </form>
+            </DialogContent>
+          </Dialog>
         </CardHeader>
         <CardContent>
-          <form action={createTeam} className="flex flex-col gap-3 sm:flex-row">
-            <Input
-              name="name"
-              placeholder="Team name"
-              minLength={1}
-              maxLength={50}
-              required
-            />
-            <Button type="submit">Create</Button>
-          </form>
+          <p className="text-sm text-muted-foreground">Manage teams you belong to.</p>
         </CardContent>
       </Card>
 

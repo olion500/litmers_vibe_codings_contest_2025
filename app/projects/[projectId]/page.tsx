@@ -20,6 +20,7 @@ import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
 import { AppShell } from "@/components/sidebar";
 import { KanbanBoard } from "@/components/kanban-board";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 
 export default async function ProjectDetailPage({
   params,
@@ -183,74 +184,85 @@ export default async function ProjectDetailPage({
       )}
 
       <Card>
-        <CardHeader className="pb-2">
-          <CardTitle>Create Issue</CardTitle>
+        <CardHeader className="pb-2 flex items-center justify-between">
+          <CardTitle>Issues</CardTitle>
+          <Dialog>
+            <DialogTrigger asChild>
+              <Button size="sm">New issue</Button>
+            </DialogTrigger>
+            <DialogContent className="sm:max-w-2xl">
+              <DialogHeader>
+                <DialogTitle>Create Issue</DialogTitle>
+              </DialogHeader>
+              <form action={addIssue} className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <input type="hidden" name="projectId" value={project.id} />
+                <div className="space-y-2">
+                  <Label htmlFor="title">Title</Label>
+                  <Input name="title" id="title" required maxLength={200} />
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="assigneeId">Assignee</Label>
+                  <select
+                    name="assigneeId"
+                    id="assigneeId"
+                    defaultValue=""
+                    className="w-full rounded-md border border-input bg-background px-3 py-2 text-sm shadow-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+                  >
+                    <option value="">Unassigned</option>
+                    {project.team.members.map((m) => (
+                      <option key={m.userId} value={m.userId}>
+                        {m.user?.name || m.user?.email}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="priority">Priority</Label>
+                  <select
+                    name="priority"
+                    id="priority"
+                    defaultValue="MEDIUM"
+                    className="w-full rounded-md border border-input bg-background px-3 py-2 text-sm shadow-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+                  >
+                    <option value="HIGH">High</option>
+                    <option value="MEDIUM">Medium</option>
+                    <option value="LOW">Low</option>
+                  </select>
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="dueDate">Due Date</Label>
+                  <Input type="date" name="dueDate" id="dueDate" />
+                </div>
+                <div className="md:col-span-2 space-y-2">
+                  <Label htmlFor="labels">Labels</Label>
+                  <select
+                    id="labels"
+                    multiple
+                    name="labels"
+                    className="mt-1 h-24 w-full rounded-md border border-input bg-background px-3 py-2 text-sm shadow-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+                  >
+                    {labels.map((l) => (
+                      <option key={l.id} value={l.id}>
+                        {l.name}
+                      </option>
+                    ))}
+                  </select>
+                  <p className="text-xs text-muted-foreground">Hold Cmd/Ctrl to select up to 5 labels.</p>
+                </div>
+                <div className="md:col-span-2 space-y-2">
+                  <Label htmlFor="description">Description</Label>
+                  <Textarea name="description" id="description" maxLength={5000} rows={4} />
+                </div>
+                <div className="md:col-span-2 flex justify-end gap-2">
+                  <Button variant="outline" type="button" onClick={() => (document?.activeElement as HTMLElement | null)?.blur()}>
+                    Cancel
+                  </Button>
+                  <Button type="submit">Create Issue</Button>
+                </div>
+              </form>
+            </DialogContent>
+          </Dialog>
         </CardHeader>
-        <CardContent>
-          <form action={addIssue} className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <input type="hidden" name="projectId" value={project.id} />
-            <div className="space-y-2">
-              <Label htmlFor="title">Title</Label>
-              <Input name="title" id="title" required maxLength={200} />
-            </div>
-            <div className="space-y-2">
-              <Label htmlFor="assigneeId">Assignee</Label>
-              <select
-                name="assigneeId"
-                id="assigneeId"
-                defaultValue=""
-                className="w-full rounded-md border border-input bg-background px-3 py-2 text-sm shadow-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
-              >
-                <option value="">Unassigned</option>
-                {project.team.members.map((m) => (
-                  <option key={m.userId} value={m.userId}>
-                    {m.user?.name || m.user?.email}
-                  </option>
-                ))}
-              </select>
-            </div>
-            <div className="space-y-2">
-              <Label htmlFor="priority">Priority</Label>
-              <select
-                name="priority"
-                id="priority"
-                defaultValue="MEDIUM"
-                className="w-full rounded-md border border-input bg-background px-3 py-2 text-sm shadow-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
-              >
-                <option value="HIGH">High</option>
-                <option value="MEDIUM">Medium</option>
-                <option value="LOW">Low</option>
-              </select>
-            </div>
-            <div className="space-y-2">
-              <Label htmlFor="dueDate">Due Date</Label>
-              <Input type="date" name="dueDate" id="dueDate" />
-            </div>
-            <div className="md:col-span-2 space-y-2">
-              <Label htmlFor="labels">Labels</Label>
-              <select
-                id="labels"
-                multiple
-                name="labels"
-                className="mt-1 h-24 w-full rounded-md border border-input bg-background px-3 py-2 text-sm shadow-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
-              >
-                {labels.map((l) => (
-                  <option key={l.id} value={l.id}>
-                    {l.name}
-                  </option>
-                ))}
-              </select>
-              <p className="text-xs text-muted-foreground">Hold Cmd/Ctrl to select up to 5 labels.</p>
-            </div>
-            <div className="md:col-span-2 space-y-2">
-              <Label htmlFor="description">Description</Label>
-              <Textarea name="description" id="description" maxLength={5000} rows={4} />
-            </div>
-            <div className="md:col-span-2 flex justify-end">
-              <Button type="submit">Create Issue</Button>
-            </div>
-          </form>
-        </CardContent>
       </Card>
 
       <Card>
