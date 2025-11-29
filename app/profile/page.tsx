@@ -1,8 +1,8 @@
-import { auth } from "@/auth";
 import { prisma } from "@/lib/prisma";
 import { profileSchemas } from "@/lib/validation";
 import { validatePassword, hashPassword, verifyPassword } from "@/lib/password";
 import { redirect } from "next/navigation";
+import { clearSessionCookiesAndRecord, requireSession } from "@/lib/session";
 
 async function getUser(userId: string) {
   return prisma.user.findUnique({ where: { id: userId, deletedAt: null } });
@@ -22,8 +22,7 @@ async function userOwnsTeams(userId: string) {
 
 async function updateProfile(formData: FormData) {
   "use server";
-  const session = await auth();
-  if (!session?.user?.id) redirect("/login");
+  const session = await requireSession();
 
   const parsed = profileSchemas.updateProfile.safeParse({
     name: formData.get("name"),
@@ -45,8 +44,7 @@ async function updateProfile(formData: FormData) {
 
 async function changePassword(formData: FormData) {
   "use server";
-  const session = await auth();
-  if (!session?.user?.id) redirect("/login");
+  const session = await requireSession();
 
   const parsed = profileSchemas.changePassword.safeParse({
     currentPassword: formData.get("currentPassword"),
@@ -69,8 +67,7 @@ async function changePassword(formData: FormData) {
 
 async function deleteAccount(formData: FormData) {
   "use server";
-  const session = await auth();
-  if (!session?.user?.id) redirect("/login");
+  const session = await requireSession();
 
   const method = formData.get("method") === "oauth" ? "oauth" : "password";
   const payload =
@@ -100,6 +97,7 @@ async function deleteAccount(formData: FormData) {
   });
   await prisma.session.deleteMany({ where: { userId: user.id } });
 
+  await clearSessionCookiesAndRecord();
   redirect("/login");
 }
 
@@ -108,8 +106,7 @@ export default async function ProfilePage({
 }: {
   searchParams: { [key: string]: string | string[] | undefined };
 }) {
-  const session = await auth();
-  if (!session?.user?.id) redirect("/login");
+  const session = await requireSession();
 
   const user = await getUser(session.user.id);
   if (!user) redirect("/login");

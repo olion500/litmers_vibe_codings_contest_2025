@@ -1,16 +1,13 @@
-import { auth, signOut } from "@/auth";
 import { redirect } from "next/navigation";
+import { clearSessionCookiesAndRecord, requireSession } from "@/lib/session";
 
 export default async function Home() {
-  const session = await auth();
-
-  if (!session?.user) {
-    redirect("/login");
-  }
+  const session = await requireSession();
 
   async function handleSignOut() {
     "use server";
-    await signOut({ redirectTo: "/login" });
+    await clearSessionCookiesAndRecord();
+    redirect("/login");
   }
 
   return (
