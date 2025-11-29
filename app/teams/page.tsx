@@ -10,7 +10,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { AppShell } from "@/components/sidebar";
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import { Dialog, DialogClose, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 
 async function createTeam(formData: FormData) {
   "use server";
@@ -136,9 +136,11 @@ export default async function TeamsPage() {
                   required
                 />
                 <div className="flex justify-end gap-2">
-                  <Button variant="outline" type="button" onClick={() => (document?.activeElement as HTMLElement | null)?.blur()}>
-                    Cancel
-                  </Button>
+                  <DialogClose asChild>
+                    <Button variant="outline" type="button">
+                      Cancel
+                    </Button>
+                  </DialogClose>
                   <Button type="submit">Create</Button>
                 </div>
               </form>

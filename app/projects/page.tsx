@@ -10,7 +10,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
 import { AppShell } from "@/components/sidebar";
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, DialogClose } from "@/components/ui/dialog";
 
 const DEFAULT_STATUSES = [
   { name: "Backlog", kind: "BACKLOG", color: "#9CA3AF", position: 0 },
@@ -146,9 +146,11 @@ export default async function ProjectsPage() {
                   <Textarea name="description" id="description" maxLength={2000} rows={4} />
                 </div>
                 <div className="md:col-span-3 flex justify-end gap-2">
-                  <Button variant="outline" type="button" onClick={() => (document?.activeElement as HTMLElement | null)?.blur()}>
-                    Cancel
-                  </Button>
+                  <DialogClose asChild>
+                    <Button variant="outline" type="button">
+                      Cancel
+                    </Button>
+                  </DialogClose>
                   <Button type="submit">Create</Button>
                 </div>
               </form>
