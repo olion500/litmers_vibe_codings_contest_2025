@@ -13,13 +13,12 @@ Instructions for AI coding assistants using OpenSpec for spec-driven development
 - Request approval: Do not start implementation until proposal is approved
 
 ## Current Project Tech Stack (Jira Lite MVP)
-- Frontend: Next.js 14 (App Router) + TypeScript; React Query; Zustand; Tailwind CSS + shadcn/ui; Recharts for charts.
-- Backend: Next.js API routes with Zod validation; NextAuth (credentials + Google OAuth) for sessions; Prisma ORM.
-- Data/Infra: PostgreSQL via Docker for local dev; optional Redis (Docker) for rate limiting; S3-compatible bucket for profile images if needed.
-- AI: OpenAI API (GPT-4o / GPT-4o-mini) for summaries, suggestions, auto-labels, duplicate detection, comment summaries.
-- Email: Resend or SendGrid for password reset and invites; MailHog locally for testing.
-- Dev/Deploy: Docker Compose for local Postgres/Redis/MailHog; production deploy on Vercel with managed Postgres.
-- .env and Makefile: Do not pre-create; add only when implementation requires. Use Docker-based Postgres/Redis/MailHog and app env vars when we start coding.
+- Frontend: Next.js 16 (App Router) + React 19 + TypeScript; Tailwind CSS v4; shadcn/ui only if needed; Recharts for charts (later).
+- Backend: Next.js API routes/server actions with Zod validation; Prisma ORM; NextAuth (credentials + Google OAuth) for sessions.
+- Data/Infra: PostgreSQL via Docker Compose; Redis via Docker Compose for rate limiting/cache; MailHog via Docker Compose for SMTP testing; local file storage for now.
+- AI: OpenAI API (GPT-4o / GPT-4o-mini) allowed; keep optional local/off switch for offline mode.
+- Dev/Tooling: pnpm as package manager; Vitest for unit tests; ESLint (Next core web vitals); GitHub Actions CI.
+- Constraints: Prefer self-hosted/local services (avoid external SaaS except Google OAuth and OpenAI); .env and Makefile only when implementation requires.
 
 ## TDD Execution & Commit Policy
 - Work task-by-task in `openspec/changes/add-jira-lite-mvp/tasks.md`.
