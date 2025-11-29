@@ -28,6 +28,9 @@ model User {
   sentInvites TeamInvite[] @relation("InviteSender")
   activities TeamActivity[] @relation("ActivityActor")
   projectFavorites ProjectFavorite[]
+  createdIssues Issue[] @relation("IssueCreator")
+  assignedIssues Issue[] @relation("IssueAssignee")
+  issueHistories IssueHistory[] @relation("HistoryActor")
 }
 
 enum TeamRole {
@@ -65,6 +68,9 @@ model Project {
 
   team       Team              @relation(fields: [teamId], references: [id], onDelete: Cascade)
   favorites  ProjectFavorite[]
+  statuses   Status[]
+  issues     Issue[]
+  labels     ProjectLabel[]
 
   @@index([teamId])
 }
@@ -80,6 +86,119 @@ model ProjectFavorite {
 
   @@unique([projectId, userId])
   @@index([userId])
+}
+
+enum IssuePriority {
+  HIGH
+  MEDIUM
+  LOW
+}
+
+enum StatusKind {
+  BACKLOG
+  IN_PROGRESS
+  DONE
+  CUSTOM
+}
+
+model Status {
+  id        String     @id @default(cuid())
+  projectId String
+  name      String
+  color     String
+  kind      StatusKind
+  position  Int
+  wipLimit  Int       @default(0) // 0 = unlimited
+  deletedAt DateTime?
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+
+  project Project @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  issues  Issue[]
+
+  @@unique([projectId, name], map: "status_unique_name_per_project")
+  @@index([projectId, position])
+}
+
+model Issue {
+  id           String         @id @default(cuid())
+  projectId    String
+  statusId     String
+  title        String
+  description  String?        @db.Text
+  priority     IssuePriority  @default(MEDIUM)
+  dueDate      DateTime?
+  assigneeId   String?
+  ownerId      String
+  statusOrder  Int            @default(0)
+  deletedAt    DateTime?
+  createdAt    DateTime       @default(now())
+  updatedAt    DateTime       @updatedAt
+
+  project  Project   @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  status   Status    @relation(fields: [statusId], references: [id], onDelete: Cascade)
+  assignee User?     @relation("IssueAssignee", fields: [assigneeId], references: [id])
+  owner    User      @relation("IssueCreator", fields: [ownerId], references: [id])
+  labels   IssueLabel[]
+  subtasks Subtask[]
+  histories IssueHistory[]
+
+  @@index([projectId, deletedAt])
+  @@index([statusId, statusOrder])
+}
+
+model ProjectLabel {
+  id        String   @id @default(cuid())
+  projectId String
+  name      String
+  color     String
+  createdAt DateTime @default(now())
+
+  project Project @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  issues  IssueLabel[]
+
+  @@unique([projectId, name], map: "label_unique_name_per_project")
+  @@index([projectId])
+}
+
+model IssueLabel {
+  id        String   @id @default(cuid())
+  issueId   String
+  labelId   String
+
+  issue Issue @relation(fields: [issueId], references: [id], onDelete: Cascade)
+  label ProjectLabel @relation(fields: [labelId], references: [id], onDelete: Cascade)
+
+  @@unique([issueId, labelId])
+  @@index([labelId])
+}
+
+model Subtask {
+  id        String   @id @default(cuid())
+  issueId   String
+  title     String
+  completed Boolean  @default(false)
+  position  Int      @default(0)
+  createdAt DateTime @default(now())
+
+  issue Issue @relation(fields: [issueId], references: [id], onDelete: Cascade)
+
+  @@index([issueId, position])
+}
+
+model IssueHistory {
+  id        String   @id @default(cuid())
+  issueId   String
+  field     String
+  oldValue  String?
+  newValue  String?
+  actorId   String
+  createdAt DateTime @default(now())
+
+  issue Issue @relation(fields: [issueId], references: [id], onDelete: Cascade)
+  actor User  @relation("HistoryActor", fields: [actorId], references: [id], onDelete: Cascade)
+
+  @@index([issueId, createdAt])
 }
 
 model TeamMember {

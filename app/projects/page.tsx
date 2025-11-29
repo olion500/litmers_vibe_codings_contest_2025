@@ -4,6 +4,12 @@ import { projectSchemas } from "@/lib/validation";
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 
+const DEFAULT_STATUSES = [
+  { name: "Backlog", kind: "BACKLOG", color: "#9CA3AF", position: 0 },
+  { name: "In Progress", kind: "IN_PROGRESS", color: "#2563EB", position: 1 },
+  { name: "Done", kind: "DONE", color: "#10B981", position: 2 },
+];
+
 async function createProject(formData: FormData) {
   "use server";
   const session = await requireSession();
@@ -22,12 +28,16 @@ async function createProject(formData: FormData) {
   if (!membership || membership.teamId !== parsed.data.teamId) redirect("/projects?error=no-team");
   if (membership.role === "MEMBER") redirect("/projects?error=forbidden");
 
-  await prisma.project.create({
-    data: {
-      teamId: parsed.data.teamId,
-      name: parsed.data.name,
-      description: parsed.data.description,
-    },
+  await prisma.$transaction(async (tx) => {
+    const project = await tx.project.create({
+      data: {
+        teamId: parsed.data.teamId,
+        name: parsed.data.name,
+        description: parsed.data.description,
+      },
+    });
+
+    await tx.status.createMany({ data: DEFAULT_STATUSES.map((s) => ({ ...s, projectId: project.id })) });
   });
   revalidatePath("/projects");
 }
@@ -92,8 +102,13 @@ export default async function ProjectsPage() {
         <form action={createProject} className="grid grid-cols-1 md:grid-cols-3 gap-3 items-start">
           <div>
             <label className="block text-sm font-medium">Team</label>
-            <select name="teamId" required className="mt-1 w-full rounded border px-3 py-2">
-              <option value="" disabled selected>
+            <select
+              name="teamId"
+              required
+              defaultValue=""
+              className="mt-1 w-full rounded border px-3 py-2"
+            >
+              <option value="" disabled>
                 Select team
               </option>
               {teams.map((t) => (

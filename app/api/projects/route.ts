@@ -6,6 +6,12 @@ import { TeamRole } from "@prisma/client";
 
 const PROJECT_LIMIT = 15;
 
+const DEFAULT_STATUSES = [
+  { name: "Backlog", kind: "BACKLOG", color: "#9CA3AF", position: 0 },
+  { name: "In Progress", kind: "IN_PROGRESS", color: "#2563EB", position: 1 },
+  { name: "Done", kind: "DONE", color: "#10B981", position: 2 },
+];
+
 export async function GET(req: Request) {
   const session = await requireSession();
   const { searchParams } = new URL(req.url);
@@ -44,12 +50,20 @@ export async function POST(req: Request) {
   const count = await prisma.project.count({ where: { teamId: parsed.data.teamId, deletedAt: null } });
   if (count >= PROJECT_LIMIT) return NextResponse.json({ error: "Project limit reached" }, { status: 400 });
 
-  const project = await prisma.project.create({
-    data: {
-      teamId: parsed.data.teamId,
-      name: parsed.data.name,
-      description: parsed.data.description,
-    },
+  const project = await prisma.$transaction(async (tx) => {
+    const created = await tx.project.create({
+      data: {
+        teamId: parsed.data.teamId,
+        name: parsed.data.name,
+        description: parsed.data.description,
+      },
+    });
+
+    await tx.status.createMany({
+      data: DEFAULT_STATUSES.map((s) => ({ ...s, projectId: created.id })),
+    });
+
+    return created;
   });
 
   return NextResponse.json({ project }, { status: 201 });

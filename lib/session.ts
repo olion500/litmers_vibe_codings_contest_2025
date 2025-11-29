@@ -2,11 +2,19 @@ import { cookies } from "next/headers";
 import { prisma } from "./prisma";
 import { redirect } from "next/navigation";
 
+// Support both Auth.js v5 (authjs.*) and legacy NextAuth (next-auth.*) cookie names.
+const sessionCookieNames = [
+  "__Secure-authjs.session-token",
+  "authjs.session-token",
+  "__Secure-next-auth.session-token",
+  "next-auth.session-token",
+];
+
 export async function getSessionFromCookies() {
   const cookieStore = await cookies();
-  const token =
-    cookieStore.get("__Secure-next-auth.session-token")?.value ||
-    cookieStore.get("next-auth.session-token")?.value;
+  const token = sessionCookieNames
+    .map((name) => cookieStore.get(name)?.value)
+    .find(Boolean);
 
   if (!token) return null;
 
@@ -22,8 +30,7 @@ export async function getSessionFromCookies() {
   }
   if (session.expires.getTime() < Date.now()) {
     await prisma.session.delete({ where: { sessionToken: token } }).catch(() => {});
-    cookieStore.delete("__Secure-next-auth.session-token");
-    cookieStore.delete("next-auth.session-token");
+    sessionCookieNames.forEach((name) => cookieStore.delete(name));
     return null;
   }
 
@@ -46,12 +53,11 @@ export async function requireSession() {
 
 export async function clearSessionCookiesAndRecord() {
   const cookieStore = await cookies();
-  const token =
-    cookieStore.get("__Secure-next-auth.session-token")?.value ||
-    cookieStore.get("next-auth.session-token")?.value;
+  const token = sessionCookieNames
+    .map((name) => cookieStore.get(name)?.value)
+    .find(Boolean);
   if (token) {
     await prisma.session.deleteMany({ where: { sessionToken: token } }).catch(() => {});
   }
-  cookieStore.delete("__Secure-next-auth.session-token");
-  cookieStore.delete("next-auth.session-token");
+  sessionCookieNames.forEach((name) => cookieStore.delete(name));
 }

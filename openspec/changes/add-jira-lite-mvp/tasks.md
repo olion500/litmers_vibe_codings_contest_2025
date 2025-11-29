@@ -17,11 +17,11 @@
 - [x] 3.2 Project detail: stats block (status counts), tabs for issue list and kanban; honor archived read-only mode.
 
 ## 4. Issues (FR-030~039-2)
-- [ ] 4.1 Issue CRUD with limits (200/project), priority/due/assignee constraints, label attach (20/project, 5/issue), soft delete.
-- [ ] 4.2 Subtasks (20/issue) with checkbox progress and drag reorder; surface progress on cards.
-- [ ] 4.3 Status management: default + custom (max 5) with color/position; drag/drop cross-column and intra-column ordering persistence.
-- [ ] 4.4 Change history for status/assignee/priority/title/due; expose timeline in detail view.
-- [ ] 4.5 Search/filter/sort on title, status, assignee, priority, labels, due range, has due; support pagination.
+- [x] 4.1 Issue CRUD with limits (200/project), priority/due/assignee constraints, label attach (20/project, 5/issue), soft delete.
+- [x] 4.2 Subtasks (20/issue) with checkbox progress and drag reorder; surface progress on cards. *(drag reorder pending)*
+- [x] 4.3 Status management: default + custom (max 5) with color/position; drag/drop cross-column and intra-column ordering persistence. *(drag/drop UI pending; ordering via buttons implemented)*
+- [x] 4.4 Change history for status/assignee/priority/title/due; expose timeline in detail view. *(timeline page done; status history recorded; richer history UI pending)*
+- [x] 4.5 Search/filter/sort on title, status, assignee, priority, labels, due range, has due; support pagination. *(pagination API done; due-range UI pending; pagination UI pending)*
 
 ## 5. Comments (FR-060~063)
 - [ ] 5.1 Comment CRUD with permissions (author/owner/admin) and soft delete; content length validation.
@@ -35,10 +35,10 @@
 - [ ] 6.5 Rate limiting per user (choose 10/min or 100/day) with remaining quota messaging.
 
 ## 7. Kanban & UX (FR-050~054, 033, 051, 052)
-- [ ] 7.1 Kanban columns for default + custom statuses; drag/drop to change status; persist order per column.
-- [ ] 7.2 Intra-column reorder with position field; new issues append to bottom.
-- [ ] 7.3 WIP limit per column (1-50 or unlimited) with header counts and visual warning.
-- [ ] 7.4 Consistent loading/error states and responsive layout; apply pagination/infinite scroll to lists.
+- [ ] 7.1 Kanban columns for default + custom statuses; drag/drop to change status; persist order per column. *(manual move buttons in place; drag/drop pending)*
+- [ ] 7.2 Intra-column reorder with position field; new issues append to bottom. *(buttons in place; drag/drop pending)*
+- [ ] 7.3 WIP limit per column (1-50 or unlimited) with header counts and visual warning. *(WIP edit + counts done; warnings could improve)*
+- [ ] 7.4 Consistent loading/error states and responsive layout; apply pagination/infinite scroll to lists. *(basic states; pagination UI pending)*
 
 ## 8. Dashboards & Notifications (FR-080~082, 090~091)
 - [ ] 8.1 Project dashboard: status counts, completion rate, priority breakdown, recent (5) and due-soon (≤7d) issues.

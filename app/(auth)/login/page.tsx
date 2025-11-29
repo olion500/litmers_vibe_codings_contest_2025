@@ -20,7 +20,7 @@ export default function LoginPage() {
       email,
       password,
       redirect: false,
-      callbackUrl: "/",
+      callbackUrl: "/projects",
     });
 
     setLoading(false);
@@ -30,11 +30,11 @@ export default function LoginPage() {
       return;
     }
 
-    router.push("/");
+    router.push("/projects");
   };
 
   const onGoogle = async () => {
-    await signIn("google", { callbackUrl: "/" });
+    await signIn("google", { callbackUrl: "/projects" });
   };
 
   return (
