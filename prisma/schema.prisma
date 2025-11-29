@@ -27,6 +27,7 @@ model User {
   ownedTeams Team[] @relation("TeamOwner")
   sentInvites TeamInvite[] @relation("InviteSender")
   activities TeamActivity[] @relation("ActivityActor")
+  projectFavorites ProjectFavorite[]
 }
 
 enum TeamRole {
@@ -47,8 +48,38 @@ model Team {
   members TeamMember[]
   invites TeamInvite[]
   activities TeamActivity[]
+  projects Project[]
 
   @@index([ownerId])
+}
+
+model Project {
+  id          String   @id @default(cuid())
+  teamId      String
+  name        String
+  description String? @db.Text
+  archivedAt  DateTime?
+  deletedAt   DateTime?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  team       Team              @relation(fields: [teamId], references: [id], onDelete: Cascade)
+  favorites  ProjectFavorite[]
+
+  @@index([teamId])
+}
+
+model ProjectFavorite {
+  id        String   @id @default(cuid())
+  projectId String
+  userId    String
+  createdAt DateTime @default(now())
+
+  project Project @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  user    User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([projectId, userId])
+  @@index([userId])
 }
 
 model TeamMember {

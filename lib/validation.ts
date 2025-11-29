@@ -45,6 +45,11 @@ export const teamSchemas = {
   changeRole: z.object({ role: z.enum(["OWNER", "ADMIN", "MEMBER"]) }),
 };
 
+export const projectSchemas = {
+  create: z.object({ teamId: z.string(), name: z.string().min(1).max(100), description: z.string().max(2000).optional() }),
+  update: z.object({ name: z.string().min(1).max(100), description: z.string().max(2000).optional() }),
+};
+
 export type RegisterInput = z.infer<typeof authSchemas.register>;
 export type LoginInput = z.infer<typeof authSchemas.login>;
 export type ResetRequestInput = z.infer<typeof authSchemas.requestReset>;

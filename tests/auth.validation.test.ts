@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { authSchemas, profileSchemas, teamSchemas } from "@/lib/validation";
+import { authSchemas, profileSchemas, teamSchemas, projectSchemas } from "@/lib/validation";
 import { validatePassword } from "@/lib/password";
 
 describe("auth validation", () => {
@@ -62,5 +62,12 @@ describe("team validation", () => {
   it("validates invite email", () => {
     expect(teamSchemas.invite.safeParse({ email: "x@example.com" }).success).toBe(true);
     expect(teamSchemas.invite.safeParse({ email: "no" }).success).toBe(false);
+  });
+});
+
+describe("project validation", () => {
+  it("validates create", () => {
+    expect(projectSchemas.create.safeParse({ teamId: "t1", name: "Proj", description: "desc" }).success).toBe(true);
+    expect(projectSchemas.create.safeParse({ teamId: "t1", name: "" }).success).toBe(false);
   });
 });
