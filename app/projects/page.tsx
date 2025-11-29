@@ -10,6 +10,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
 import { AppShell } from "@/components/sidebar";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 
 const DEFAULT_STATUSES = [
   { name: "Backlog", kind: "BACKLOG", color: "#9CA3AF", position: 0 },
@@ -105,43 +106,57 @@ export default async function ProjectsPage() {
   return (
     <AppShell>
       <main className="max-w-5xl mx-auto py-6 space-y-8">
-        <Card>
-        <CardHeader>
+      <Card>
+        <CardHeader className="flex items-center justify-between">
           <CardTitle>Projects</CardTitle>
+          <Dialog>
+            <DialogTrigger asChild>
+              <Button size="sm">New project</Button>
+            </DialogTrigger>
+            <DialogContent className="sm:max-w-2xl">
+              <DialogHeader>
+                <DialogTitle>Create project</DialogTitle>
+              </DialogHeader>
+              <form action={createProject} className="grid grid-cols-1 md:grid-cols-3 gap-3 items-start">
+                <div className="space-y-2 md:col-span-3">
+                  <Label htmlFor="teamId">Team</Label>
+                  <select
+                    name="teamId"
+                    id="teamId"
+                    required
+                    defaultValue=""
+                    className="w-full rounded-md border border-input bg-background px-3 py-2 text-sm shadow-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+                  >
+                    <option value="" disabled>
+                      Select team
+                    </option>
+                    {teams.map((t) => (
+                      <option key={t.id} value={t.id}>
+                        {t.name}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+                <div className="space-y-2 md:col-span-3">
+                  <Label htmlFor="name">Name</Label>
+                  <Input name="name" id="name" required minLength={1} maxLength={100} />
+                </div>
+                <div className="md:col-span-3 space-y-2">
+                  <Label htmlFor="description">Description (markdown)</Label>
+                  <Textarea name="description" id="description" maxLength={2000} rows={4} />
+                </div>
+                <div className="md:col-span-3 flex justify-end gap-2">
+                  <Button variant="outline" type="button" onClick={() => (document?.activeElement as HTMLElement | null)?.blur()}>
+                    Cancel
+                  </Button>
+                  <Button type="submit">Create</Button>
+                </div>
+              </form>
+            </DialogContent>
+          </Dialog>
         </CardHeader>
         <CardContent>
-          <form action={createProject} className="grid grid-cols-1 md:grid-cols-3 gap-3 items-start">
-            <div className="space-y-2">
-              <Label htmlFor="teamId">Team</Label>
-              <select
-                name="teamId"
-                id="teamId"
-                required
-                defaultValue=""
-                className="w-full rounded-md border border-input bg-background px-3 py-2 text-sm shadow-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
-              >
-                <option value="" disabled>
-                  Select team
-                </option>
-                {teams.map((t) => (
-                  <option key={t.id} value={t.id}>
-                    {t.name}
-                  </option>
-                ))}
-              </select>
-            </div>
-            <div className="space-y-2">
-              <Label htmlFor="name">Name</Label>
-              <Input name="name" id="name" required minLength={1} maxLength={100} />
-            </div>
-            <div className="md:col-span-3 space-y-2">
-              <Label htmlFor="description">Description (markdown)</Label>
-              <Textarea name="description" id="description" maxLength={2000} rows={3} />
-            </div>
-            <div className="md:col-span-3 flex justify-end">
-              <Button type="submit">Create</Button>
-            </div>
-          </form>
+          <p className="text-sm text-muted-foreground">Create projects and manage favorites, archive, and stats.</p>
         </CardContent>
       </Card>
 
