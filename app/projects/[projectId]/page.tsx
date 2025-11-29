@@ -18,8 +18,8 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
-import { Checkbox } from "@/components/ui/checkbox";
 import { AppShell } from "@/components/sidebar";
+import { KanbanBoard } from "@/components/kanban-board";
 
 export default async function ProjectDetailPage({
   params,
@@ -136,16 +136,12 @@ export default async function ProjectDetailPage({
     revalidatePath(`/projects/${params.projectId}`);
   }
 
-  async function move(formData: FormData) {
+  const moveAction = async (issueId: string, toStatusId: string, toOrder: number) => {
     "use server";
     const session = await requireSession();
-    const issueId = String(formData.get("issueId"));
-    const toStatusId = String(formData.get("statusId"));
-    const toOrderRaw = formData.get("toOrder");
-    const toOrder = toOrderRaw ? Number(toOrderRaw) : 0;
     await moveIssue(issueId, session.user.id, toStatusId, toOrder);
     revalidatePath(`/projects/${params.projectId}`);
-  }
+  };
 
   async function addSubtask(formData: FormData) {
     "use server";
@@ -165,11 +161,6 @@ export default async function ProjectDetailPage({
     await updateSubtaskHelper(subtaskId, session.user.id, { completed });
     revalidatePath(`/projects/${params.projectId}`);
   }
-
-  const issuesByStatus = project.statuses.map((status) => ({
-    status,
-    issues: project.issues.filter((i) => i.statusId === status.id),
-  }));
 
   return (
     <AppShell>
@@ -334,109 +325,15 @@ export default async function ProjectDetailPage({
           </form>
           <p className="text-xs text-muted-foreground mt-1">Up to 5 custom statuses. WIP 1-50 or 0 for unlimited.</p>
         </details>
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-          {issuesByStatus.map(({ status, issues }) => (
-            <Card key={status.id} className="p-3 space-y-3">
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="font-semibold" style={{ color: status.color }}>
-                    {status.name}
-                  </p>
-                  <form action={updateWip} className="flex items-center gap-1 text-xs text-muted-foreground mt-1">
-                    <input type="hidden" name="statusId" value={status.id} />
-                    <span>WIP</span>
-                    <Input type="number" name="wipLimit" min={0} max={50} defaultValue={status.wipLimit} className="w-16 px-2 py-1" />
-                    <span className="text-[11px]">(0 = ∞)</span>
-                    <Button type="submit" size="sm" variant="outline" className="h-7 px-2">Save</Button>
-                  </form>
-                  {status.wipLimit > 0 && (
-                    <p className="text-xs text-muted-foreground">Current {issues.length}/{status.wipLimit}</p>
-                  )}
-                </div>
-              </div>
-              {issues.map((issue, idx) => (
-                <article key={issue.id} className="rounded-md border p-3 space-y-2 bg-card">
-                  <div className="flex justify-between items-start gap-2">
-                    <div>
-                      <a className="font-semibold hover:underline" href={`/projects/${project.id}/issues/${issue.id}`}>
-                        {issue.title}
-                      </a>
-                      <p className="text-xs text-muted-foreground">#{issue.id.slice(0, 6)}</p>
-                    </div>
-                    <Badge variant="secondary">{issue.priority}</Badge>
-                  </div>
-                  {issue.description && <p className="text-sm text-foreground/80 line-clamp-3">{issue.description}</p>}
-                  <div className="flex flex-wrap gap-1 text-xs">
-                    {issue.labels.map((l) => (
-                      <span key={l.id} className="px-2 py-0.5 rounded" style={{ background: l.label.color, color: "white" }}>
-                        {l.label.name}
-                      </span>
-                    ))}
-                    {issue.assignee && <Badge variant="outline">{issue.assignee.name || issue.assignee.email}</Badge>}
-                  </div>
-
-                  <form action={move} className="flex items-center gap-2 text-sm">
-                    <input type="hidden" name="issueId" value={issue.id} />
-                    <input type="hidden" name="toOrder" value={idx} />
-                    <Label className="text-xs text-muted-foreground">Move</Label>
-                    <select name="statusId" className="rounded-md border border-input bg-background px-2 py-1 text-sm" defaultValue={issue.statusId}>
-                      {project.statuses.map((s) => (
-                        <option key={s.id} value={s.id}>
-                          {s.name}
-                        </option>
-                      ))}
-                    </select>
-                    <Button type="submit" size="sm" className="h-8 px-3">
-                      Go
-                    </Button>
-                  </form>
-                  <div className="flex gap-1 text-[11px] text-muted-foreground">
-                    {idx > 0 && (
-                      <form action={move}>
-                        <input type="hidden" name="issueId" value={issue.id} />
-                        <input type="hidden" name="statusId" value={status.id} />
-                        <input type="hidden" name="toOrder" value={idx - 1} />
-                        <Button variant="link" size="sm" className="h-auto px-1">↑</Button>
-                      </form>
-                    )}
-                    {idx < issues.length - 1 && (
-                      <form action={move}>
-                        <input type="hidden" name="issueId" value={issue.id} />
-                        <input type="hidden" name="statusId" value={status.id} />
-                        <input type="hidden" name="toOrder" value={idx + 1} />
-                        <Button variant="link" size="sm" className="h-auto px-1">↓</Button>
-                      </form>
-                    )}
-                  </div>
-
-                  <div className="space-y-1">
-                    <p className="text-xs font-semibold">
-                      Subtasks {issue.subtasks.filter((s) => s.completed).length}/{issue.subtasks.length}
-                    </p>
-                    {issue.subtasks.map((st) => (
-                      <form key={st.id} action={toggleSubtask} className="flex items-center gap-2 text-xs">
-                        <input type="hidden" name="subtaskId" value={st.id} />
-                        <input type="hidden" name="completed" value={st.completed ? "false" : "true"} />
-                        <Checkbox checked={st.completed} readOnly className="h-3.5 w-3.5" />
-                        <span className={st.completed ? "line-through" : ""}>{st.title}</span>
-                        <Button type="submit" variant="link" size="sm" className="h-auto px-1 text-[11px]">
-                          Toggle
-                        </Button>
-                      </form>
-                    ))}
-                    <form action={addSubtask} className="flex items-center gap-2 text-xs">
-                      <input type="hidden" name="issueId" value={issue.id} />
-                      <Input name="title" placeholder="New subtask" className="flex-1" />
-                      <Button type="submit" size="sm" className="h-8">Add</Button>
-                    </form>
-                  </div>
-                </article>
-              ))}
-
-              {issues.length === 0 && <p className="text-xs text-muted-foreground">No issues</p>}
-            </Card>
-          ))}
-        </div>
+        <KanbanBoard
+          projectId={project.id}
+          statuses={project.statuses}
+          issues={project.issues}
+          moveIssue={moveAction}
+          updateWip={updateWip}
+          toggleSubtask={toggleSubtask}
+          addSubtask={addSubtask}
+        />
       </section>
       </main>
     </AppShell>
