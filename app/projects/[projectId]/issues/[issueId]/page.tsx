@@ -25,7 +25,7 @@ export default async function IssueDetailPage({ params, searchParams }: { params
       project: { team: { members: { some: { userId: session.user.id, deletedAt: null } }, deletedAt: null } },
     },
     include: {
-      project: { include: { team: true } },
+      project: { include: { team: { include: { members: true } } } },
       status: true,
       labels: { include: { label: true } },
       subtasks: { orderBy: { position: "asc" } },
@@ -126,7 +126,7 @@ export default async function IssueDetailPage({ params, searchParams }: { params
           <ul className="space-y-1 text-sm text-foreground/80">
             {issue.subtasks.map((st) => (
               <li key={st.id} className="flex items-center gap-2">
-                <Checkbox checked={st.completed} readOnly className="h-4 w-4" />
+                <Checkbox checked={st.completed} className="h-4 w-4" />
                 <span className={st.completed ? "line-through" : ""}>{st.title}</span>
               </li>
             ))}

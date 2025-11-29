@@ -20,8 +20,8 @@ services:
     ports:
       - "6379:6379"
 
-  mailhog:
-    image: mailhog/mailhog:latest
+  mailpit:
+    image: axllent/mailpit:latest
     restart: unless-stopped
     ports:
       - "8025:8025" # UI

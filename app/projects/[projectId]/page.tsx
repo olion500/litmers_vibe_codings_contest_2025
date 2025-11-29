@@ -94,7 +94,7 @@ export default async function ProjectDetailPage({
     const wipLimit = Number(formData.get("wipLimit"));
     const status = await prisma.status.findFirst({ where: { id: statusId, projectId: params.projectId } });
     if (!status) redirect(`/projects/${params.projectId}?error=status`);
-    const membership = await prisma.teamMember.findFirst({ where: { teamId: project.teamId, userId: session.user.id, deletedAt: null } });
+    const membership = await prisma.teamMember.findFirst({ where: { teamId: project!.teamId, userId: session.user.id, deletedAt: null } });
     if (!membership || membership.role === "MEMBER") redirect(`/projects/${params.projectId}?error=forbidden`);
     await prisma.status.update({ where: { id: statusId, projectId: params.projectId }, data: { wipLimit } });
     revalidatePath(`/projects/${params.projectId}`);
@@ -417,7 +417,7 @@ export default async function ProjectDetailPage({
                       <form key={st.id} action={toggleSubtask} className="flex items-center gap-2 text-xs">
                         <input type="hidden" name="subtaskId" value={st.id} />
                         <input type="hidden" name="completed" value={st.completed ? "false" : "true"} />
-                        <Checkbox checked={st.completed} readOnly className="h-3.5 w-3.5" />
+                        <Checkbox checked={st.completed} className="h-3.5 w-3.5" />
                         <span className={st.completed ? "line-through" : ""}>{st.title}</span>
                         <Button type="submit" variant="link" size="sm" className="h-auto px-1 text-[11px]">
                           Toggle

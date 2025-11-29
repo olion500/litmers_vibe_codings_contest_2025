@@ -73,7 +73,7 @@ export default function LoginPage() {
               />
             </div>
             {error && (
-              <Alert variant="default">
+              <Alert>
                 <AlertDescription>{error}</AlertDescription>
               </Alert>
             )}

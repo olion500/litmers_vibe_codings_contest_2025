@@ -3,6 +3,7 @@ import { requireSession } from "@/lib/session";
 import { projectSchemas } from "@/lib/validation";
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
+import { StatusKind } from "@prisma/client";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -12,9 +13,9 @@ import { Badge } from "@/components/ui/badge";
 import { AppShell } from "@/components/sidebar";
 
 const DEFAULT_STATUSES = [
-  { name: "Backlog", kind: "BACKLOG", color: "#9CA3AF", position: 0 },
-  { name: "In Progress", kind: "IN_PROGRESS", color: "#2563EB", position: 1 },
-  { name: "Done", kind: "DONE", color: "#10B981", position: 2 },
+  { name: "Backlog", kind: "BACKLOG" as StatusKind, color: "#9CA3AF", position: 0 },
+  { name: "In Progress", kind: "IN_PROGRESS" as StatusKind, color: "#2563EB", position: 1 },
+  { name: "Done", kind: "DONE" as StatusKind, color: "#10B981", position: 2 },
 ];
 
 async function createProject(formData: FormData) {

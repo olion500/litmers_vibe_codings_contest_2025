@@ -1,7 +1,7 @@
 "use client";
 
-import { useState } from "react";
-import { useRouter } from "next/navigation";
+import { useState, useEffect } from "react";
+import { useRouter, useSearchParams } from "next/navigation";
 import { signIn } from "next-auth/react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -11,8 +11,12 @@ import { Alert, AlertDescription } from "@/components/ui/alert";
 
 export default function RegisterPage() {
   const router = useRouter();
+  const searchParams = useSearchParams();
+  const inviteToken = searchParams.get("inviteToken");
+  const inviteEmail = searchParams.get("email");
+
   const [name, setName] = useState("");
-  const [email, setEmail] = useState("");
+  const [email, setEmail] = useState(inviteEmail || "");
   const [password, setPassword] = useState("");
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
@@ -22,10 +26,15 @@ export default function RegisterPage() {
     setError(null);
     setLoading(true);
 
+    const body: any = { name, email, password };
+    if (inviteToken) {
+      body.inviteToken = inviteToken;
+    }
+
     const res = await fetch("/api/auth/register", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ name, email, password }),
+      body: JSON.stringify(body),
     });
 
     if (!res.ok) {
@@ -50,14 +59,26 @@ export default function RegisterPage() {
       return;
     }
 
-    router.push("/");
+    // If came from an invite, redirect to teams page
+    if (inviteToken) {
+      router.push("/teams?success=invite-accepted");
+    } else {
+      router.push("/");
+    }
   };
 
   return (
     <div className="max-w-md mx-auto py-12">
       <Card>
         <CardHeader>
-          <CardTitle>Create account</CardTitle>
+          <CardTitle>
+            {inviteToken ? "Join Team & Create Account" : "Create account"}
+          </CardTitle>
+          {inviteToken && (
+            <p className="text-sm text-gray-600 mt-2">
+              You're accepting a team invitation
+            </p>
+          )}
         </CardHeader>
         <CardContent>
           <form onSubmit={onSubmit} className="space-y-4">
